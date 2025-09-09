@@ -1,0 +1,154 @@
+:root {
+    --fg: #222;
+    --muted: #666;
+    --bg: #f3f3f3;
+    --card: #fff;
+    --line: #e6e6e6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+    background: var(--bg);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 36px auto;
+    padding: 0 12px;
+}
+
+.page-title {
+    margin: 36px 0 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #222;
+    letter-spacing: 1px;
+    border-left: #0a0a0a 6px solid;
+    padding-left: 12px;
+}
+
+.month-nav {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding:0 24px;
+}
+
+.month-nav .btn {
+    padding: 8px 18px;
+    background: #fff;
+    text-decoration: none;
+    color: #4e4e4e;
+    font-weight: bold;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+
+.month-nav .btn:hover {
+    background: #f0f0f0;
+}
+
+.month-nav .month-label {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 17px;
+    color: #222;
+    letter-spacing: 1px;
+}
+
+.arrow {
+    font-size: 18px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 32px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 18px;
+}
+
+.table th,
+.table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+}
+
+.table th {
+    background: #ffffff;
+    font-weight: 700;
+    color: #505050;
+    font-size: 18px;
+    border-bottom: #c9c9c9 2px solid;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table td {
+    font-size: 18px;
+    color: #616161;
+    font-weight: bold;
+}
+
+.link {
+    color: #000000;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.link:hover {
+    color: #084298;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+
+    .container,
+    .card {
+        padding: 0 4px;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px 4px;
+        font-size: 13px;
+    }
+
+    .month-nav .btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .month-nav .month-label {
+        font-size: 14px;
+    }
+
+    .page-title {
+        font-size: 17px;
+    }
+}

@@ -1,0 +1,52 @@
+<mxfile host="65bd71144e">
+    <diagram id="yQXxYchViqLM1C8CpK09" name="ER Diagram (CrowFoot)">
+        <mxGraphModel dx="575" dy="503" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-31" value="users" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="240" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-32" value="attend_logs" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="60" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-33" value="work_days" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="240" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-34" value="break_sessions" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="420" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-35" value="approval_requests" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="160" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-36" value="leave_requests" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="360" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-37" value="work_settings" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="60" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-38" value="holidays" style="shape=swimlane;childLayout=stackLayout;rounded=0;horizontal=1;startSize=26;fillColor=#EEF2FF;strokeColor=#2563EB;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="420" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-39" value="user_id → users.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-32" target="JXRrq00v3o5EiI92fKZ0-31">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-40" value="user_id → users.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-33" target="JXRrq00v3o5EiI92fKZ0-31">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-41" value="user_id → users.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-34" target="JXRrq00v3o5EiI92fKZ0-31">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-42" value="user_id / approver_id → users.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-35" target="JXRrq00v3o5EiI92fKZ0-31">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-43" value="work_day_id → work_days.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-35" target="JXRrq00v3o5EiI92fKZ0-33">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JXRrq00v3o5EiI92fKZ0-44" value="user_id / approver_id → users.id " style="endArrow=ERcrowfootMany;startArrow=ERmandOne;strokeColor=#111827;fontSize=11;" edge="1" parent="1" source="JXRrq00v3o5EiI92fKZ0-36" target="JXRrq00v3o5EiI92fKZ0-31">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
