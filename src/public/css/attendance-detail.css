@@ -1,0 +1,213 @@
+:root {
+    --detail-card: #fff;
+    --detail-line: #ededed;
+    --detail-radius: 16px;
+    --detail-shadow: 0 2px 16px rgba(0, 0, 0, .04);
+    --detail-fg: #222;
+    --detail-muted: #888;
+    --detail-bg: #f3f2f5;
+}
+
+body {
+    background: var(--detail-bg);
+}
+
+.attendance-detail {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.attendance-detail__title {
+    margin: 48px auto 48px auto;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: .02em;
+    position: relative;
+    padding-left: 16px;
+    text-align: left;
+    max-width: 760px;
+    width: 100%;
+    border-left: 6px solid #222;
+    color: #222;
+}
+
+.attendance-detail__card {
+    background: var(--detail-card);
+    border: 1.5px solid var(--detail-line);
+    border-radius: var(--detail-radius);
+    box-shadow: var(--detail-shadow);
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto 0;
+}
+
+.attendance-detail__body {
+    padding: 0;
+}
+
+.attendance-detail__table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--detail-fg);
+    background: var(--detail-card);
+}
+
+.attendance-detail__table th,
+.attendance-detail__table td {
+    padding: 20px 0;
+    border-bottom: 1.5px solid var(--detail-line);
+    vertical-align: middle;
+    font-size: 17px;
+}
+
+.attendance-detail__table th {
+    width: 120px;
+    color: var(--detail-muted);
+    font-weight: 600;
+    letter-spacing: .02em;
+    background: var(--detail-card);
+    text-align: left;
+    padding-left: 36px;
+}
+
+.attendance-detail__table td {
+    background: var(--detail-card);
+    text-align: center;
+    color: #222;
+}
+
+.attendance-detail__table tr:last-child th,
+.attendance-detail__table tr:last-child td {
+    border-bottom: none;
+}
+
+.attendance-detail__label {
+    width: 120px;
+    color: var(--detail-muted);
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: .02em;
+    text-align: left;
+    padding-left: 32px;
+}
+
+.attendance-detail__value--date {
+    padding: 0;
+}
+
+.attendance-detail__date-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    font-weight: bold;
+    font-size: 19px;
+    letter-spacing: 1px;
+}
+
+.attendance-detail__date-year,
+.attendance-detail__date-day {
+    font-size: 19px;
+    font-weight: 700;
+    text-align: center;
+    color: #222;
+}
+
+.attendance-detail__time-range {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.attendance-detail__separator {
+    color: var(--detail-muted);
+    font-size: 18px;
+}
+
+.attendance-detail__input-time {
+    width: 100px;
+    text-align: center;
+    padding: 8px 10px;
+    border: 1.5px solid var(--detail-line);
+    border-radius: 8px;
+    background: #f7f7f7;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-size: 17px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: default;
+    user-select: none;
+    color: #222;
+}
+
+.attendance-detail__input-notes {
+    width: 45%;
+    padding: 12px 12px;
+    border: 1.5px solid var(--detail-line);
+    border-radius: 8px;
+    background: #f7f7f7;
+    font-size: 16px;
+    margin: 0 auto;
+    display: block;
+    text-align: left;
+    resize: none;
+    color: #222;
+}
+
+.attendance-detail__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 32px 0 0 0;
+    max-width: 760px;
+    margin-left: 570px;
+}
+
+.attendance-detail__button {
+    padding: 12px 40px;
+    background: #111;
+    color: #fff;
+    border: 1.5px solid #111;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: background 0.2s, opacity .2s, filter .2s;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+@media (max-width: 640px) {
+    .attendance-detail__card {
+        max-width: 98vw;
+    }
+
+    .attendance-detail__title {
+        margin: 24px auto 12px auto;
+        padding-left: 20px;
+    }
+
+    .attendance-detail__table th {
+        padding-left: 12px;
+    }
+
+    .attendance-detail__input-time {
+        width: 72px;
+        font-size: 14px;
+    }
+
+    .attendance-detail__input-notes {
+        width: 96%;
+        font-size: 13px;
+    }
+
+    .attendance-detail__actions {
+        padding: 16px 12px 16px 0;
+    }
+}
