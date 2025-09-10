@@ -62,7 +62,7 @@ class AttendanceListController extends Controller
                 'clock_out'   => $clockOutTime,
                 'break_hm'    => $totalBreakMinutes ? $this->toHm($totalBreakMinutes) : '',
                 'total_hm'    => is_null($totalWorkMinutes) ? '' : $this->toHm($totalWorkMinutes),
-                // 'detail_url'  => route('timecard', [], false) . '?date=' . $dateKey, // 詳細画面（後で置換OK）
+                'detail_url'  => $attendance ? route('attendance.detail', ['id' => $attendance->id]) : null,
             ];
         }
 

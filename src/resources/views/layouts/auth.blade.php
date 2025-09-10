@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>@yield('title', 'COACHTECH 勤怠管理')</title>
   <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/sanitize.css') }}">
   @yield('css')
 </head>
 <body>

@@ -1,0 +1,94 @@
+/* ===== Request List (申請一覧) ===== */
+:root {
+    --line-color: #ddd;
+    --bg-card: #fff;
+    --text-main: #222;
+}
+
+/* タイトル */
+.request-list__title {
+    margin: 32px auto 20px;
+    font-size: 20px;
+    font-weight: 700;
+    max-width: 1000px;
+    padding-left: 16px;
+    position: relative;
+}
+
+.request-list__title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 4px;
+    background: #111;
+    border-radius: 2px;
+}
+
+/* タブ */
+.request-list__tabs {
+    display: flex;
+    gap: 32px;
+    border-bottom: 1px solid var(--line-color);
+    max-width: 1000px;
+    margin: 0 auto 12px;
+}
+
+.request-list__tab {
+    padding: 10px 4px;
+    text-decoration: none;
+    color: #666;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.request-list__tab.is-active {
+    color: var(--text-main);
+    border-color: #111;
+}
+
+/* カードとテーブル */
+.request-list__card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-color);
+    border-radius: 8px;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.request-list__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.request-list__th,
+.request-list__td {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--line-color);
+    text-align: center;
+    font-size: 14px;
+}
+
+.request-list__th {
+    background: #fafafa;
+    font-weight: bold;
+    color: #444;
+}
+
+.request-list__tr:last-child .request-list__td {
+    border-bottom: none;
+}
+
+/* リンク */
+.request-list__link {
+    color: #000000;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.request-list__link:hover {
+    text-decoration: underline;
+}
