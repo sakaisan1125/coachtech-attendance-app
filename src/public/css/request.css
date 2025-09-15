@@ -92,3 +92,57 @@
 .request-list__link:hover {
     text-decoration: underline;
 }
+
+@media (min-width: 1400px) {
+
+    .request-list__card,
+    .request-list__title,
+    .request-list__tabs {
+        max-width: 1200px;
+    }
+
+    .request-list__title {
+        font-size: 28px;
+        margin: 48px auto 32px;
+        padding-left: 32px;
+    }
+
+    .request-list__th,
+    .request-list__td {
+        font-size: 16px;
+        padding: 12px 18px;
+    }
+
+    .request-list__tab {
+        font-size: 16px;
+        padding: 16px 8px;
+    }
+}
+
+/* --- タブレット (768px〜850px) --- */
+@media (min-width: 768px) and (max-width: 850px) {
+
+    .request-list__card,
+    .request-list__title,
+    .request-list__tabs {
+        max-width: 95vw;
+    }
+
+    .request-list__title {
+        font-size: 17px;
+        margin: 24px auto 12px;
+        padding-left: 8px;
+    }
+
+    .request-list__th,
+    .request-list__td {
+        font-size: 12px;
+        padding: 8px 8px;
+    }
+
+    .request-list__tab {
+        font-size: 13px;
+        padding: 8px 2px;
+    }
+
+}

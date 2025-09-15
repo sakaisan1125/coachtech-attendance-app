@@ -12,7 +12,7 @@ body {
 }
 
 .attendance-status {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .status-label {
@@ -26,30 +26,31 @@ body {
 }
 
 .attendance-date {
-    font-size: 1.3em;
+    font-size: 40px;
+    font-weight: 400;
     margin-bottom: 8px;
 }
 
 .attendance-time {
-    font-size: 3em;
-    font-weight: bold;
-    margin-bottom: 32px;
+    font-size: 80px;
+    font-weight: 700;
+    margin-bottom: 48px;
     letter-spacing: 2px;
 }
 
 .attendance-btns {
     display: flex;
     justify-content: center;
-    gap: 24px;
+    gap: 48px;
 }
 
 .attendance-btn {
-    min-width: 140px;
+    min-width: 221px;
     padding: 16px 0;
-    font-size: 1.2em;
+    font-size: 32px;
     font-weight: bold;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     cursor: pointer;
     margin-bottom: 16px;
     transition: opacity 0.2s;
@@ -76,4 +77,59 @@ body {
     font-weight: bold;
     margin-top: 32px;
     color: #222;
+}
+
+@media (min-width: 1400px) {
+    .attendance-wrap {
+        max-width: 700px;
+        padding: 64px 80px;
+        margin-top: 80px;
+    }
+
+    .attendance-date {
+        font-size: 56px;
+    }
+
+    .attendance-time {
+        font-size: 80px;
+        margin-bottom: 64px;
+    }
+
+    .attendance-btns {
+        gap: 96px;
+    }
+
+    .attendance-btn {
+        min-width: 221px;
+        font-size: 32px;
+        padding: 24px 0;
+    }
+}
+
+/* --- タブレット (768px〜850px) --- */
+@media (min-width: 768px) and (max-width: 850px) {
+    .attendance-wrap {
+        max-width: 98vw;
+        padding: 32px 8vw;
+        margin-top: 32px;
+    }
+
+    .attendance-date {
+        font-size: 28px;
+    }
+
+    .attendance-time {
+        font-size: 56px;
+        margin-bottom: 32px;
+    }
+
+    .attendance-btns {
+        gap: 24px;
+    }
+
+    .attendance-btn {
+        min-width: 140px;
+        font-size: 20px;
+        padding: 10px 0;
+    }
 }

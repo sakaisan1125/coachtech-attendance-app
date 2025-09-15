@@ -9,6 +9,7 @@ use App\Http\Controllers\UserRequestListController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\RegisterController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/attendance', [TimecardController::class, 'index'])->name('attendance');
@@ -52,6 +53,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('admin/attendance/{id}', [AdminController::class, 'adminAttendanceUpdate'])
     ->whereNumber('id')
     ->name('admin.update');
+
+    Route::get('/stamp_correction_request/approve/{attendance_correct_request}', [AdminController::class, 'showApproveRequest'])
+    ->name('admin.approve');
+    Route::post('/stamp_correction_request/approve/{attendance_correct_request}', [AdminController::class, 'approveCorrectionRequest'])
+        ->name('admin.approve');
 });
 
 Route::get('/logout',function(){
@@ -59,10 +65,24 @@ Route::get('/logout',function(){
     return redirect('/login');
 });
 
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
 Route::get('/admin/login', function () {
     return view('auth.admin-login');
 })->name('admin.login');
 
-Route::post('/admin/login', [AuthenticatedSessionController::class, 'store']);
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+// Route::post('/admin/login', [AuthenticatedSessionController::class, 'store']);
+// Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+// Route::get('/admin/login', function () {
+//     return view('auth.admin-login');
+// })->name('admin.login');
 
+Route::post('/admin/login', [AuthenticatedSessionController::class, 'adminLogin']);

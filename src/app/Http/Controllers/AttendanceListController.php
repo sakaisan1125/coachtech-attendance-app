@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\CorrectionRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -38,21 +39,51 @@ class AttendanceListController extends Controller
             $dateKey = $date->toDateString();
             $attendance = $attendanceRecords->get($dateKey);
 
-            $clockInTime  = $attendance?->clock_in_at?->format('H:i') ?? '';
-            $clockOutTime = $attendance?->clock_out_at?->format('H:i') ?? '';
+            $correctionRequest = $attendance
+                ? CorrectionRequest::with('breaks')
+                    ->where('attendance_id', $attendance->id)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->latest()
+                    ->first()
+                : null;
 
-            // 休憩合計（分）
+            // 出勤・退勤時刻（修正申請があればそちらを優先）
+            $clockInTime  = $correctionRequest?->requested_clock_in_at
+                ? Carbon::parse($correctionRequest->requested_clock_in_at)->format('H:i')
+                : ($attendance?->clock_in_at?->format('H:i') ?? '');
+
+            $clockOutTime = $correctionRequest?->requested_clock_out_at
+                ? Carbon::parse($correctionRequest->requested_clock_out_at)->format('H:i')
+                : ($attendance?->clock_out_at?->format('H:i') ?? '');
+
+            // 休憩合計（分） 修正申請があればそちらを優先
             $totalBreakMinutes = 0;
-            foreach ($attendance?->breaks ?? [] as $break) {
-                if ($break->break_start_at && $break->break_end_at) {
-                    $totalBreakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+            if ($correctionRequest && $correctionRequest->breaks->count()) {
+                foreach ($correctionRequest->breaks as $break) {
+                    if ($break->requested_break_start_at && $break->requested_break_end_at) {
+                        $start = $break->requested_break_start_at instanceof Carbon
+                            ? $break->requested_break_start_at
+                            : Carbon::parse($break->requested_break_start_at);
+                        $end = $break->requested_break_end_at instanceof Carbon
+                            ? $break->requested_break_end_at
+                            : Carbon::parse($break->requested_break_end_at);
+                        $totalBreakMinutes += $start->diffInMinutes($end);
+                    }
+                }
+            } else {
+                foreach ($attendance?->breaks ?? [] as $break) {
+                    if ($break->break_start_at && $break->break_end_at) {
+                        $totalBreakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                    }
                 }
             }
 
             // 合計（分）＝ 退勤-出勤 - 休憩（両方ある時だけ計算）
             $totalWorkMinutes = null;
-            if ($attendance?->clock_in_at && $attendance?->clock_out_at) {
-                $totalWorkMinutes = $attendance->clock_in_at->diffInMinutes($attendance->clock_out_at) - $totalBreakMinutes;
+            if ($clockInTime && $clockOutTime) {
+                $in = Carbon::createFromFormat('H:i', $clockInTime);
+                $out = Carbon::createFromFormat('H:i', $clockOutTime);
+                $totalWorkMinutes = $in->diffInMinutes($out) - $totalBreakMinutes;
                 if ($totalWorkMinutes < 0) $totalWorkMinutes = 0;
             }
 

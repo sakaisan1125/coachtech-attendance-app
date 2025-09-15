@@ -44,3 +44,78 @@
 .admin-login__btn:hover {
     background: #333;
 }
+
+/* --- PC (1400px以上) --- */
+@media (min-width: 1400px) {
+    .admin-login {
+        max-width: 700px;
+        margin: 80px auto;
+        padding: 48px 64px;
+    }
+
+    .admin-login__title {
+        font-size: 36px;
+        margin-bottom: 48px;
+    }
+
+    .admin-login__field input {
+        font-size: 20px;
+        padding: 22px 14px;
+    }
+
+    .admin-login__btn {
+        font-size: 22px;
+        padding: 18px 0;
+        margin-top: 60px;
+    }
+}
+
+/* --- タブレット (768px〜850px) --- */
+@media (min-width: 768px) and (max-width: 850px) {
+    .admin-login {
+        max-width: 96vw;
+        margin: 32px auto;
+        padding: 24px 4vw;
+    }
+
+    .admin-login__title {
+        font-size: 24px;
+        margin-bottom: 24px;
+    }
+
+    .admin-login__field input {
+        font-size: 16px;
+        padding: 12px 8px;
+    }
+
+    .admin-login__btn {
+        font-size: 16px;
+        padding: 12px 0;
+        margin-top: 32px;
+    }
+}
+
+/* --- スマホ (640px以下) --- */
+@media (max-width: 640px) {
+    .admin-login {
+        max-width: 100vw;
+        margin: 12px auto;
+        padding: 8px 2vw;
+    }
+
+    .admin-login__title {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .admin-login__field input {
+        font-size: 13px;
+        padding: 8px 4px;
+    }
+
+    .admin-login__btn {
+        font-size: 13px;
+        padding: 8px 0;
+        margin-top: 16px;
+    }
+}

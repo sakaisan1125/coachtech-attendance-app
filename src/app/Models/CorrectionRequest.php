@@ -12,6 +12,11 @@ class CorrectionRequest extends Model {
         'approved_by','approved_at','rejected_reason'
     ];
 
+    protected $casts = [
+        'requested_clock_in_at' => 'datetime',
+        'requested_clock_out_at' => 'datetime',
+    ];
+
     public function attendance(){ return $this->belongsTo(Attendance::class); }
     public function requester(){ return $this->belongsTo(User::class,'requested_by'); }
     public function approver(){ return $this->belongsTo(User::class,'approved_by'); }

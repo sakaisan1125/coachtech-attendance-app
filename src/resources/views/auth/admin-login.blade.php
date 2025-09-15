@@ -15,15 +15,26 @@
 
         <div class="admin-login__field">
             <label for="email">メールアドレス</label>
-            <input type="email" name="email" id="email" required autofocus>
+            <input type="email" name="email" id="email">
+            @error('email')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="admin-login__field">
             <label for="password">パスワード</label>
-            <input type="password" name="password" id="password" required>
+            <input type="password" name="password" id="password">
+            @error('password')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
         </div>
+
+        @error('auth')
+            <div class="form-error">{{ $message }}</div>
+        @enderror
 
         <button type="submit" class="admin-login__btn">管理者ログインする</button>
     </form>
 </div>
+
 @endsection

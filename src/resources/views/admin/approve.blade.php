@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', '勤怠詳細')
+@section('title', '修正申請承認画面（管理者）')
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
 @endsection
 
 @section('content')
@@ -33,7 +33,7 @@
 <div class="attendance-detail">
     <h1 class="attendance-detail__title">勤怠詳細</h1>
 
-    <form method="POST" action="{{ route('attendance.request', ['id' => $attendance->id]) }}">
+    <form method="POST" action="{{ route('admin.approve', ['attendance_correct_request' => $correctionRequest->id]) }}">
         @csrf
         <div class="attendance-detail__card">
             <div class="attendance-detail__body">
@@ -114,12 +114,10 @@
             </div>
         </div>
         <div class="attendance-detail__actions">
-            @if($hasPending)
-                <div class="attendance-detail__pending-msg">
-                    *承認待ちのため修正はできません。
-                </div>
+            @if($isApproved)
+            <div class="approved-label">承認済み</div>
             @else
-                <button type="submit" class="attendance-detail__button">修正</button>
+            <button type="submit" class="attendance-detail__button">承認</button>
             @endif
         </div>
     </form>
