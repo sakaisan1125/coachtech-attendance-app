@@ -145,4 +145,34 @@ class AdminController extends Controller
         return redirect()->route('admin.detail', ['id'=>$attendance->id])
             ->with('success','修正しました。');
     }
+
+    public function showApproveRequest(Request $request, CorrectionRequest $attendance_correct_request)
+    {
+        $correctionRequest = CorrectionRequest::with(['attendance.user', 'breaks'])->findOrFail($attendance_correct_request->id);
+
+        $attendance = $correctionRequest->attendance;
+        $user = $attendance->user;
+        $hasPending = $correctionRequest->status === 'pending';
+        $isApproved = $correctionRequest->status === 'approved';
+
+        return view('admin.approve', [
+            'correctionRequest' => $correctionRequest,
+            'attendance' => $attendance,
+            'user' => $user,
+            'hasPending' => $hasPending,
+            'isApproved' => $isApproved,
+        ]);
+    }
+
+    public function approveCorrectionRequest(Request $request, CorrectionRequest $attendance_correct_request)
+    {
+        $attendance_correct_request ->status = 'approved';
+        $attendance_correct_request ->approved_at = now();
+        $attendance_correct_request ->approved_by = Auth::id();
+        $attendance_correct_request ->save();
+
+        return redirect()->route('requests.pending', ['attendance_correct_request' => $attendance_correct_request->id])
+            ->with('success', '勤怠修正申請を承認しました。');
+    }
+    
 }

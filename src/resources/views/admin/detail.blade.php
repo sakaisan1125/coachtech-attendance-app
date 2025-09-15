@@ -74,30 +74,27 @@
               </td>
             </tr>
 
-            {{-- 休憩（可変行） --}}
-            @php $uiBreaks = old('breaks', $breakRows); @endphp
-            @foreach($uiBreaks as $i => $br)
-              <tr class="attendance-detail__row attendance-detail__row--break">
-                <th class="attendance-detail__label">{{ $i === 0 ? '休憩' : '休憩'.($i+1) }}</th>
-                <td class="attendance-detail__value">
-                  <div class="attendance-detail__time-range">
-                    <input type="text"
-                           name="breaks[{{ $i }}][start]"
-                           class="attendance-detail__input-time"
-                           value="{{ $br['start'] ?? '' }}"
-                           placeholder="12:00">
-                    <span class="attendance-detail__separator">〜</span>
-                    <input type="text"
-                           name="breaks[{{ $i }}][end]"
-                           class="attendance-detail__input-time"
-                           value="{{ $br['end'] ?? '' }}"
-                           placeholder="13:00">
-                  </div>
-                  @error("breaks.$i.start") <div class="form-error">{{ $message }}</div> @enderror
-                  @error("breaks.$i.end")   <div class="form-error">{{ $message }}</div> @enderror
-                </td>
-              </tr>
-            @endforeach
+            {{-- 休憩（1行目は「休憩」、以降は「休憩2,3…」） --}}
+                        @foreach($breakRows as $i => $br)
+                            <tr class="attendance-detail__row attendance-detail__row--break">
+                                <th class="attendance-detail__label">{{ $i === 0 ? '休憩' : '休憩'.($i+1) }}</th>
+                                <td class="attendance-detail__value">
+                                    <div class="attendance-detail__time-range">
+                                        <input type="text"
+                                            name="breaks[{{ $i }}][start]"
+                                            class="attendance-detail__input-time"
+                                            value="{{ old("breaks.$i.start", isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_start_at ? $correctionRequest->breaks[$i]->requested_break_start_at->format('H:i') : $dash) }}">
+                                        <span class="attendance-detail__separator">〜</span>
+                                        <input type="text"
+                                            name="breaks[{{ $i }}][end]"
+                                            class="attendance-detail__input-time"
+                                            value="{{ old("breaks.$i.end", isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_end_at ? $correctionRequest->breaks[$i]->requested_break_end_at->format('H:i') : $dash) }}">
+                                    </div>
+                                    @error("breaks.$i.start") <div class="form-error">{{ $message }}</div> @enderror
+                                    @error("breaks.$i.end") <div class="form-error">{{ $message }}</div> @enderror
+                                </td>
+                            </tr>
+                        @endforeach
 
             {{-- 備考 --}}
             <tr class="attendance-detail__row attendance-detail__row--notes">

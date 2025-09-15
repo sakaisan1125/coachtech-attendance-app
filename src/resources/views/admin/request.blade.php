@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/request.css') }}">
@@ -46,8 +46,7 @@
             <td class="request-list__td">{{ $reason }}</td>
             <td class="request-list__td">{{ $applied }}</td>
             <td class="request-list__td">
-              {{-- 詳細画面は次のステップで実装予定。ひとまず # にしています。 --}}
-              <a class="request-list__link" href="{{ route('admin.detail', ['id' => $r->attendance->id]) }}">詳細</a>
+              <a class="request-list__link" href="{{ route('admin.approve', ['attendance_correct_request' => $r->id]) }}">詳細</a>
             </td>
           </tr>
         @empty

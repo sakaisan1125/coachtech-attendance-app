@@ -13,6 +13,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use App\Http\Requests\CustomFortifyLoginRequest;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -29,16 +30,16 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->app->bind(
+            \Laravel\Fortify\Http\Requests\LoginRequest::class,
+           \App\Http\Requests\LoginRequest::class
+        );
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
-        Fortify::loginView(function () {
-            return request()->is('admin/login')
-                ? view('auth.admin-login')
-                : view('auth.login');
-        });
+        
 
         Fortify::registerView(fn () => view('auth.register'));
 
@@ -57,6 +58,10 @@ class FortifyServiceProvider extends ServiceProvider
             if ($user && \Hash::check($request->password, $user->password)) {
                 return $user;
             }
+
+        Fortify::loginView(function () {
+            return view('auth.login');
+        });
         });
 
         // Fortify::redirects([
