@@ -15,15 +15,44 @@ class AdminController extends Controller
 {
     public function adminAttendanceList(Request $request)
     {
-        // Only allow admins to access this route
         if (Auth::user()->role !== 'admin') {
             abort(403);
         }
 
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        // Fetch attendance data for the admin
-        $attendanceData = Attendance::whereDate('work_date', $date->toDateString())->get();
+        // 勤怠データ取得
+        $attendanceData = Attendance::with('user', 'breaks')
+            ->whereDate('work_date', $date->toDateString())
+            ->get()
+            ->map(function ($row) {
+                // 出勤・退勤
+                $clockIn  = $row->clock_in_at;
+                $clockOut = $row->clock_out_at;
+
+                // 休憩合計（分）
+                $breakMinutes = 0;
+                foreach ($row->breaks as $break) {
+                    if ($break->break_start_at && $break->break_end_at && $break->break_end_at > $break->break_start_at) {
+                        $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                    }
+                }
+
+                // 労働合計（分）
+                $workMinutes = null;
+                if ($clockIn && $clockOut && $clockOut > $clockIn) {
+                    $workMinutes = $clockIn->diffInMinutes($clockOut) - $breakMinutes;
+                    if ($workMinutes < 0) $workMinutes = 0;
+                }
+
+                // H:i形式に変換
+                $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
+
+                $row->breaks_sum = $breakMinutes ? $toHm($breakMinutes) : '';
+                $row->work_sum   = !is_null($workMinutes) ? $toHm($workMinutes) : '';
+
+                return $row;
+            });
 
         return view('admin.list', compact('attendanceData', 'date'));
     }
@@ -142,7 +171,7 @@ class AdminController extends Controller
             }
         });
 
-        return redirect()->route('admin.detail', ['id'=>$attendance->id])
+        return redirect()->route('admin.attendance.list', ['id'=>$attendance->id])
             ->with('success','修正しました。');
     }
 

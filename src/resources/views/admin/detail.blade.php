@@ -83,15 +83,31 @@
                                         <input type="text"
                                             name="breaks[{{ $i }}][start]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old("breaks.$i.start", isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_start_at ? $correctionRequest->breaks[$i]->requested_break_start_at->format('H:i') : $dash) }}">
+                                            value="{{ old(
+                                                "breaks.$i.start",
+                                                isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_start_at
+                                                    ? $correctionRequest->breaks[$i]->requested_break_start_at->format('H:i')
+                                                    : ($breakRows[$i]['start'] ?? "")
+                                            ) }}"
+                                        >
                                         <span class="attendance-detail__separator">〜</span>
                                         <input type="text"
                                             name="breaks[{{ $i }}][end]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old("breaks.$i.end", isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_end_at ? $correctionRequest->breaks[$i]->requested_break_end_at->format('H:i') : $dash) }}">
+                                            value="{{ old(
+                                                "breaks.$i.end",
+                                                isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_end_at
+                                                    ? $correctionRequest->breaks[$i]->requested_break_end_at->format('H:i')
+                                                    : ($breakRows[$i]['end'] ?? "")
+                                            ) }}"
+                                        >
                                     </div>
-                                    @error("breaks.$i.start") <div class="form-error">{{ $message }}</div> @enderror
-                                    @error("breaks.$i.end") <div class="form-error">{{ $message }}</div> @enderror
+                                    @error("breaks.$i.start")
+                                        <div class="form-error">{{ $message }}</div>
+                                    @enderror
+                                    @error("breaks.$i.end")
+                                        <div class="form-error">{{ $message }}</div>
+                                    @enderror
                                 </td>
                             </tr>
                         @endforeach

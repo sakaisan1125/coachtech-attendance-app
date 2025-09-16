@@ -8,6 +8,20 @@
 @endsection
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 <div class="attendance-list">
   <h1 class="attendance-list__title">{{ $date->format('Y年n月j日') }}の勤怠</h1>
 
@@ -63,10 +77,10 @@
             <td>{{ $row->user->name }}</td>
             <td>{{ $row->clock_in_at ? \Carbon\Carbon::parse($row->clock_in_at)->format('H:i') : '-' }}</td>
             <td>{{ $row->clock_out_at ? \Carbon\Carbon::parse($row->clock_out_at)->format('H:i') : '-' }}</td>
-            <td>{{ $row->breaks_sum ?? '1:00' }}</td>
-            <td>{{ $row->work_sum ?? '8:00' }}</td>
+            <td>{{ $row->breaks_sum ?? '-' }}</td>
+            <td>{{ $row->work_sum ?? '-' }}</td>
             <td>
-              <a href="{{ route('attendance.detail', ['id' => $row->id]) }}" class="attendance-list__detail-link">詳細</a>
+              <a href="{{ route('admin.detail', ['id' => $row->id]) }}" class="attendance-list__detail-link">詳細</a>
             </td>
           </tr>
         @endforeach
