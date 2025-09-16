@@ -129,3 +129,26 @@ body {
 .attendance-list__detail-link:hover {
     text-decoration: underline;
 }
+
+.alert-success {
+    background: #e6ffed;
+    color: #218838;
+    border: 1px solid #b2f5c2;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 18px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* エラーメッセージ */
+.alert-danger {
+    background: #ffe6e6;
+    color: #c82333;
+    border: 1px solid #f5b2b2;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 18px;
+    font-size: 1rem;
+    font-weight: 600;
+}

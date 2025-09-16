@@ -126,6 +126,94 @@ body {
     text-decoration: none;
 }
 
+/* --- PC (1400px以上) --- */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1200px;
+        padding: 0 32px;
+    }
+
+    .card {
+        margin-bottom: 48px;
+        border-radius: 18px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .table th,
+    .table td {
+        padding: 18px 32px;
+        font-size: 22px;
+    }
+
+    .page-title {
+        font-size: 32px;
+        margin: 56px 0 32px;
+        padding-left: 24px;
+    }
+
+    .month-nav {
+        padding: 0 48px;
+        font-size: 18px;
+    }
+
+    .month-nav .btn {
+        padding: 12px 32px;
+        font-size: 18px;
+    }
+
+    .month-nav .month-label {
+        font-size: 22px;
+    }
+
+    .link {
+        font-size: 22px;
+    }
+}
+
+/* --- タブレット (768px〜850px) --- */
+@media (min-width: 768px) and (max-width: 850px) {
+    .container {
+        max-width: 98vw;
+        padding: 0 8vw;
+    }
+
+    .card {
+        margin-bottom: 24px;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 15px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        margin: 32px 0 16px;
+        padding-left: 8px;
+    }
+
+    .month-nav {
+        padding: 0 12px;
+        font-size: 14px;
+    }
+
+    .month-nav .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .month-nav .month-label {
+        font-size: 16px;
+    }
+
+    .link {
+        font-size: 15px;
+    }
+}
+
 @media (max-width: 600px) {
 
     .container,

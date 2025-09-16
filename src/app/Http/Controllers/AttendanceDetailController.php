@@ -17,8 +17,10 @@ class AttendanceDetailController extends Controller
         $user = $request->user();
         $attendance = Attendance::with('breaks')->where('id', $id)->where('user_id', $user->id)->firstOrFail();
 
-        $correctionRequest = CorrectionRequest::where('attendance_id', $attendance->id)
+        $correctionRequest = CorrectionRequest::with('breaks')
+            ->where('attendance_id', $attendance->id)
             ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->latest()
             ->first();
 
         $hasPending = $correctionRequest && $correctionRequest->status === 'pending';
