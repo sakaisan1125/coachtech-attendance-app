@@ -125,10 +125,15 @@
         </table>
       </div>
     </div>
-
     <div class="attendance-detail__actions">
-      <button type="submit" class="attendance-detail__button">修正</button>
-    </div>
+            @if($hasPending)
+                <div class="attendance-detail__pending-msg">
+                    *承認待ちのため修正はできません。
+                </div>
+            @else
+                <button type="submit" class="attendance-detail__button">修正</button>
+            @endif
+        </div>
   </form>
 </div>
 

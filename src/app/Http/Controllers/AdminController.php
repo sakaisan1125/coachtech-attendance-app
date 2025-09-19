@@ -75,6 +75,13 @@ class AdminController extends Controller
     {
         $attendance = Attendance::with(['user','breaks'])->findOrFail($id);
 
+        $correctionRequest = CorrectionRequest::with('breaks')
+            ->where('attendance_id', $attendance->id)
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->latest()
+            ->first();
+        $hasPending = $correctionRequest && $correctionRequest->status === 'pending';
+
         return view('admin.detail', [
             'attendance' => $attendance,
             'user'       => $attendance->user,
@@ -86,6 +93,7 @@ class AdminController extends Controller
                                 'start'=>$b->break_start_at?->format('H:i'),
                                 'end'  =>$b->break_end_at?->format('H:i'),
                             ])->values()->all(),
+            'hasPending' => $hasPending,
         ]);
     }
 
@@ -195,6 +203,12 @@ class AdminController extends Controller
 
     public function approveCorrectionRequest(Request $request, CorrectionRequest $attendance_correct_request)
     {
+        $attendance = $attendance_correct_request->attendance;
+        $attendance->clock_in_at  = $attendance_correct_request->requested_clock_in_at;
+        $attendance->clock_out_at = $attendance_correct_request->requested_clock_out_at;
+        $attendance->notes        = $attendance_correct_request->requested_notes;
+        $attendance->save();
+
         $attendance_correct_request ->status = 'approved';
         $attendance_correct_request ->approved_at = now();
         $attendance_correct_request ->approved_by = Auth::id();
@@ -204,4 +218,66 @@ class AdminController extends Controller
             ->with('success', '勤怠修正申請を承認しました。');
     }
     
+    public function adminStaffList()
+    {
+        $staffs = User::where('role', 'user')->get();
+        return view('admin.staff', compact('staffs'));
+    }
+
+    public function adminStaffAttendanceList(Request $request, int $id)
+    {
+
+        Carbon::setLocale('ja');
+
+        $staff = User::findOrFail($id);
+        if ($staff->role !== 'user') {
+            abort(404);
+        }
+
+        $month = $request->input('month', now()) ->format('Y-m');
+        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $endDate   = $startDate->copy()->endOfMonth();
+
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', $staff->id)
+            ->whereBetween('work_date', [$startDate, $endDate])
+            ->orderBy('work_date')
+            ->get();
+
+        $dailyAttendanceList = [];
+        foreach ($attendances as $attendance) {
+            $date = Carbon::parse($attendance->work_date);
+            $clockIn  = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
+            $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
+            $breakMinutes = 0;
+            foreach ($attendance->breaks as $break) {
+                if ($break->break_start_at && $break->break_end_at) {
+                    $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                }
+            }
+            $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
+            if ($workMinutes < 0) $workMinutes = 0;
+
+            $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
+
+            $dailyAttendanceList[] = [
+                'date'       => $date,
+                'clock_in'   => $clockIn,
+                'clock_out'  => $clockOut,
+                'break_hm'   => $breakMinutes ? $toHm($breakMinutes) : '',
+                'total_hm'   => !is_null($workMinutes) ? $toHm($workMinutes) : '',
+                'detail_url' => route('admin.detail', ['id' => $attendance->id]),
+            ];
+        }
+            
+        return view('admin.staff_attendance_list', [
+            'staff' => $staff,
+            'attendances' => $attendances,
+            'month' => $month,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'dailyAttendanceList' => $dailyAttendanceList,
+        ]);
+
+    }
 }

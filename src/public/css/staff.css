@@ -1,0 +1,111 @@
+:root {
+    --line-color: #ddd;
+    --bg-card: #fff;
+    --text-main: #222;
+}
+
+/* タイトル */
+.staff-list__title {
+    margin: 32px auto 20px;
+    font-size: 20px;
+    font-weight: 700;
+    max-width: 1000px;
+    padding-left: 16px;
+    position: relative;
+}
+
+.staff-list__title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 4px;
+    background: #111;
+    border-radius: 2px;
+}
+
+/* カードとテーブル */
+.staff-list__card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-color);
+    border-radius: 8px;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.staff-list__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.staff-list__th,
+.staff-list__td {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--line-color);
+    text-align: center;
+    font-size: 14px;
+}
+
+.staff-list__th {
+    background: #fafafa;
+    font-weight: bold;
+    color: #444;
+}
+
+.staff-list__tr:last-child .staff-list__td {
+    border-bottom: none;
+}
+
+/* リンク */
+.staff-list__link {
+    color: #000000;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.staff-list__link:hover {
+    text-decoration: underline;
+}
+
+@media (min-width: 1400px) {
+
+    .staff-list__card,
+    .staff-list__title {
+        max-width: 1200px;
+    }
+
+    .staff-list__title {
+        font-size: 28px;
+        margin: 48px auto 32px;
+        padding-left: 32px;
+    }
+
+    .staff-list__th,
+    .staff-list__td {
+        font-size: 16px;
+        padding: 12px 18px;
+    }
+}
+
+/* --- タブレット (768px〜850px) --- */
+@media (min-width: 768px) and (max-width: 850px) {
+
+    .staff-list__card,
+    .staff-list__title {
+        max-width: 95vw;
+    }
+
+    .staff-list__title {
+        font-size: 17px;
+        margin: 24px auto 12px;
+        padding-left: 8px;
+    }
+
+    .staff-list__th,
+    .staff-list__td {
+        font-size: 12px;
+        padding: 8px 8px;
+    }
+}
