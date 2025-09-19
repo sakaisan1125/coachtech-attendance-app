@@ -25,11 +25,28 @@ class AttendanceDetailController extends Controller
 
         $hasPending = $correctionRequest && $correctionRequest->status === 'pending';
 
+        if ($hasPending) {
+            $display = [
+                'clock_in_at'  => $correctionRequest->requested_clock_in_at,
+                'clock_out_at' => $correctionRequest->requested_clock_out_at,
+                'breaks'       => $correctionRequest->breaks,
+                'notes'        => $correctionRequest->requested_notes,
+            ];
+        } else {
+            $display = [
+                'clock_in_at'  => $attendance->clock_in_at,
+                'clock_out_at' => $attendance->clock_out_at,
+                'breaks'       => $attendance->breaks,
+                'notes'        => $attendance->notes,
+            ];
+        }
+
         return view('attendance.detail', [
             'attendance' => $attendance,
             'user'      => $user,
             'correctionRequest' => $correctionRequest,
             'hasPending' => $hasPending,
+            'display'   => $display,
         ]);
 
     }

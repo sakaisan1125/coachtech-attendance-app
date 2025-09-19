@@ -47,19 +47,25 @@ class AttendanceListController extends Controller
                     ->first()
                 : null;
 
-            // 出勤・退勤時刻（修正申請があればそちらを優先）
-            $clockInTime  = $correctionRequest?->requested_clock_in_at
-                ? Carbon::parse($correctionRequest->requested_clock_in_at)->format('H:i')
-                : ($attendance?->clock_in_at?->format('H:i') ?? '');
+            $isPending = $correctionRequest && $correctionRequest->status === 'pending';
+            $isAttendanceChanged = $attendance &&
+                (
+                    $attendance->clock_in_at != $correctionRequest?->requested_clock_in_at ||
+                    $attendance->clock_out_at != $correctionRequest?->requested_clock_out_at ||
+                    $attendance->notes != $correctionRequest?->requested_notes
+                    // 休憩も必要ならbreaksの比較も追加
+                );
 
-            $clockOutTime = $correctionRequest?->requested_clock_out_at
-                ? Carbon::parse($correctionRequest->requested_clock_out_at)->format('H:i')
-                : ($attendance?->clock_out_at?->format('H:i') ?? '');
-
-            // 休憩合計（分） 修正申請があればそちらを優先
-            $totalBreakMinutes = 0;
-            if ($correctionRequest && $correctionRequest->breaks->count()) {
-                foreach ($correctionRequest->breaks as $break) {
+            if ($isPending) {
+                // 申請内容を優先
+                $clockInTime  = $correctionRequest?->requested_clock_in_at
+                    ? Carbon::parse($correctionRequest->requested_clock_in_at)->format('H:i')
+                    : '';
+                $clockOutTime = $correctionRequest?->requested_clock_out_at
+                    ? Carbon::parse($correctionRequest->requested_clock_out_at)->format('H:i')
+                    : '';
+                $totalBreakMinutes = 0;
+                foreach ($correctionRequest->breaks ?? [] as $break) {
                     if ($break->requested_break_start_at && $break->requested_break_end_at) {
                         $start = $break->requested_break_start_at instanceof Carbon
                             ? $break->requested_break_start_at
@@ -71,6 +77,10 @@ class AttendanceListController extends Controller
                     }
                 }
             } else {
+                // attendanceの値を優先
+                $clockInTime  = $attendance?->clock_in_at?->format('H:i') ?? '';
+                $clockOutTime = $attendance?->clock_out_at?->format('H:i') ?? '';
+                $totalBreakMinutes = 0;
                 foreach ($attendance?->breaks ?? [] as $break) {
                     if ($break->break_start_at && $break->break_end_at) {
                         $totalBreakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
@@ -78,7 +88,6 @@ class AttendanceListController extends Controller
                 }
             }
 
-            // 合計（分）＝ 退勤-出勤 - 休憩（両方ある時だけ計算）
             $totalWorkMinutes = null;
             if ($clockInTime && $clockOutTime) {
                 $in = Carbon::createFromFormat('H:i', $clockInTime);

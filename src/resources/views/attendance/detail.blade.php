@@ -64,36 +64,12 @@
                                     <input type="text"
                                         name="clock_in_at"
                                         class="attendance-detail__input-time"
-                                        value="{{ old(
-                                            'clock_in_at',
-                                            $correctionRequest && $correctionRequest->requested_clock_in_at
-                                                ? (method_exists($correctionRequest->requested_clock_in_at, 'format')
-                                                    ? $correctionRequest->requested_clock_in_at->format('H:i')
-                                                    : substr($correctionRequest->requested_clock_in_at, 0, 5))
-                                                : ($attendance->clock_in_at
-                                                    ? (method_exists($attendance->clock_in_at, 'format')
-                                                        ? $attendance->clock_in_at->format('H:i')
-                                                        : substr($attendance->clock_in_at, 0, 5))
-                                                    : $dash)
-                                        ) }}"
-                                    >
+                                        value="{{ old('clock_in_at', $display['clock_in_at'] ? $display['clock_in_at']->format('H:i') : $dash) }}">
                                     <span class="attendance-detail__separator">〜</span>
                                     <input type="text"
                                         name="clock_out_at"
                                         class="attendance-detail__input-time"
-                                        value="{{ old(
-                                            'clock_out_at',
-                                            $correctionRequest && $correctionRequest->requested_clock_out_at
-                                                ? (method_exists($correctionRequest->requested_clock_out_at, 'format')
-                                                    ? $correctionRequest->requested_clock_out_at->format('H:i')
-                                                    : substr($correctionRequest->requested_clock_out_at, 0, 5))
-                                                : ($attendance->clock_out_at
-                                                    ? (method_exists($attendance->clock_out_at, 'format')
-                                                        ? $attendance->clock_out_at->format('H:i')
-                                                        : substr($attendance->clock_out_at, 0, 5))
-                                                    : $dash)
-                                        ) }}"
-                                    >
+                                        value="{{ old('clock_out_at', $display['clock_out_at'] ? $display['clock_out_at']->format('H:i') : $dash) }}">
                                     @error('clock_in_at')
                                         <div class="form-error">{{ $message }}</div>
                                     @enderror
@@ -113,24 +89,12 @@
                                         <input type="text"
                                             name="breaks[{{ $i }}][start]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old(
-                                                "breaks.$i.start",
-                                                isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_start_at
-                                                    ? $correctionRequest->breaks[$i]->requested_break_start_at->format('H:i')
-                                                    : ($breakRows[$i]['start'] ?? $dash)
-                                            ) }}"
-                                        >
+                                            value="{{ old("breaks.$i.start", $br['start'] ?? $dash) }}">
                                         <span class="attendance-detail__separator">〜</span>
                                         <input type="text"
                                             name="breaks[{{ $i }}][end]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old(
-                                                "breaks.$i.end",
-                                                isset($correctionRequest->breaks[$i]) && $correctionRequest->breaks[$i]?->requested_break_end_at
-                                                    ? $correctionRequest->breaks[$i]->requested_break_end_at->format('H:i')
-                                                    : ($breakRows[$i]['end'] ?? $dash)
-                                            ) }}"
-                                        >
+                                            value="{{ old("breaks.$i.end", $br['end'] ?? $dash) }}">
                                     </div>
                                     @error("breaks.$i.start")
                                         <div class="form-error">{{ $message }}</div>
@@ -147,9 +111,9 @@
                             <th class="attendance-detail__label">備考</th>
                             <td class="attendance-detail__value">
                                 <textarea
-                                    class="attendance-detail__input-notes"
-                                    name="notes"
-                                    rows="3">{{ old('notes', $correctionRequest && $correctionRequest->requested_notes ? $correctionRequest->requested_notes : '') }}</textarea>
+                                class="attendance-detail__input-notes"
+                                name="notes"
+                                rows="3">{{ old('notes', $display['notes'] ?? '') }}</textarea>
                                 @error('notes')
                                     <div class="form-error">{{ $message }}</div>
                                 @enderror

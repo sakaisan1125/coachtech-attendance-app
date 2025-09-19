@@ -3,7 +3,7 @@ body {
 }
 
 .attendance-list {
-    max-width: 820px;
+    max-width: 900px;
     margin: 40px auto;
 }
 
@@ -103,10 +103,10 @@ body {
 }
 
 .attendance-list__table {
-    width: 95%;
+    width: 100%;
     margin: 0 auto 16px;
     border-collapse: collapse;
-    font-size: .95rem;
+    font-size: 1rem;
 }
 
 .attendance-list__table th,
@@ -151,4 +151,67 @@ body {
     margin-bottom: 18px;
     font-size: 1rem;
     font-weight: 600;
+}
+
+@media (min-width: 1400px) and (max-width: 1540px) {
+    .attendance-list {
+        max-width: 1200px;
+        margin: 48px auto;
+    }
+
+    .attendance-list__title {
+        font-size: 2rem;
+        margin-bottom: 32px;
+        padding-left: 32px;
+        border-left-width: 8px;
+    }
+
+    .attendance-list__card {
+        padding: 24px 0 0 0;
+    }
+
+    .attendance-list__table {
+        width: 98%;
+        font-size: 1.05rem;
+    }
+
+    .attendance-list__table th,
+    .attendance-list__table td {
+        padding: 16px 0;
+    }
+}
+
+/* ===== タブレット (768px〜850px) ===== */
+@media (min-width: 768px) and (max-width: 850px) {
+    .attendance-list {
+        max-width: 95vw;
+        margin: 24px auto;
+    }
+
+    .attendance-list__title {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        padding-left: 8px;
+        border-left-width: 4px;
+    }
+
+    .attendance-list__card {
+        padding: 8px 0 0 0;
+    }
+
+    .attendance-list__table {
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    .attendance-list__table th,
+    .attendance-list__table td {
+        padding: 8px 0;
+    }
+
+    .attendance-list__date-pill {
+        width: 120px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
 }

@@ -16,10 +16,9 @@
         <!-- <a href="{{ route('attendance') }}" class="header__link">勤怠</a> -->
         <a href="/admin/attendance/list" class="header__link">勤怠一覧</a>
         <!-- <a href="/request" class="header__link">申請</a> -->
-         <a href="" class="header__link">スタッフ一覧</a>
+         <a href="/admin/staff/list" class="header__link">スタッフ一覧</a>
         <a href="{{ route('requests.pending') }}" class="header__link">申請一覧</a>
         <a href="/logout" class="header__link">ログアウト</a>
-        <!-- <a href="" class="header__link">ログアウト</a> -->
     </nav>
   </header>
   <main>
