@@ -17,7 +17,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => bcrypt('password123'), // テスト用の固定パスワード
+            'role' => 'user', // 必要なら追加
         ];
     }
 }
