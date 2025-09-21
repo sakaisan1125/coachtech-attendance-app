@@ -7,6 +7,13 @@
 @endsection
 
 @section('content')
+
+@if(session('success') || !empty($success))
+    <div class="alert alert-success">
+        {{ session('success') ?? $success }}
+    </div>
+@endif
+
 @php
     // 日付を一度だけ生成して使い回し
     $d = $attendance->work_date instanceof \Carbon\Carbon

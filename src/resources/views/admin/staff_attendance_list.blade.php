@@ -31,10 +31,10 @@
                 @foreach ($dailyAttendanceList as $attendance)
                     <tr>
                         <td>{{ $attendance['date']->isoFormat('MM/DD(ddd)') }}</td>
-                        <td>{{ $attendance['clock_in'] ?: '-' }}</td>
-                        <td>{{ $attendance['clock_out'] ?: '-' }}</td>
-                        <td>{{ $attendance['break_hm'] ?: '-' }}</td>
-                        <td>{{ $attendance['total_hm'] ?: '-' }}</td>
+                        <td>{{ $attendance['clock_in'] ?: '' }}</td>
+                        <td>{{ $attendance['clock_out'] ?: '' }}</td>
+                        <td>{{ $attendance['break_hm'] ?: '' }}</td>
+                        <td>{{ $attendance['total_hm'] ?: '' }}</td>
                         <td><a class="link" href="{{ $attendance['detail_url'] }}">詳細</a></td>
                     </tr>
                 @endforeach

@@ -205,6 +205,20 @@ body {
     margin-right: 0;
 }
 
+.alert-success {
+    background: #e6fff2;
+    color: #1a7f37;
+    border: 1.5px solid #1a7f37;
+    border-radius: 8px;
+    padding: 16px 32px;
+    margin: 32px auto 0 auto;
+    max-width: 900px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(26, 127, 55, 0.08);
+}
+
 @media (min-width: 1400px) {
     .attendance-detail__card {
         background: var(--detail-card);
