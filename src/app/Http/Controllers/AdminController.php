@@ -108,11 +108,13 @@ class AdminController extends Controller
         $data = $request->validate([
             'clock_in'           => ['nullable','date_format:H:i'],
             'clock_out'          => ['nullable','date_format:H:i'],
-            'notes'              => ['nullable','string','max:1000'],
+            'notes'              => ['required','string','max:1000'],
             // 休憩は可変配列 breaks[n][start/end]
             'breaks'             => ['array'],
             'breaks.*.start'     => ['nullable','date_format:H:i'],
             'breaks.*.end'       => ['nullable','date_format:H:i'],
+        ],[
+            'notes.required' => '備考を入力してください。',
         ]);
 
         $workDate = Carbon::parse($attendance->work_date)->toDateString(); // Y-m-d
@@ -214,7 +216,7 @@ class AdminController extends Controller
         $attendance_correct_request ->approved_by = Auth::id();
         $attendance_correct_request ->save();
 
-        return redirect()->route('requests.pending', ['attendance_correct_request' => $attendance_correct_request->id])
+        return redirect()->route('admin.approve', ['attendance_correct_request' => $attendance_correct_request->id])
             ->with('success', '勤怠修正申請を承認しました。');
     }
     
@@ -234,7 +236,10 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $month = $request->input('month', now()) ->format('Y-m');
+        $month = $request->input('month'); // "2025-10" など
+        if (!$month) {
+            $month = now()->format('Y-m');
+        }
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate   = $startDate->copy()->endOfMonth();
 
@@ -244,30 +249,46 @@ class AdminController extends Controller
             ->orderBy('work_date')
             ->get();
 
+        $attendanceRecords = $attendances->keyBy(function($a) {
+            return Carbon::parse($a->work_date)->toDateString();
+        });
+
         $dailyAttendanceList = [];
-        foreach ($attendances as $attendance) {
-            $date = Carbon::parse($attendance->work_date);
-            $clockIn  = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
-            $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
-            $breakMinutes = 0;
-            foreach ($attendance->breaks as $break) {
-                if ($break->break_start_at && $break->break_end_at) {
-                    $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            $dateKey = $date->toDateString();
+            $attendance = $attendanceRecords->get($dateKey);
+
+            if ($attendance) {
+                $clockIn  = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
+                $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
+                $breakMinutes = 0;
+                foreach ($attendance->breaks as $break) {
+                    if ($break->break_start_at && $break->break_end_at) {
+                        $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                    }
                 }
+                $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
+                if ($workMinutes < 0) $workMinutes = 0;
+                $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
+                $dailyAttendanceList[] = [
+                    'date'       => $date->copy(),
+                    'clock_in'   => $clockIn,
+                    'clock_out'  => $clockOut,
+                    'break_hm'   => $breakMinutes ? $toHm($breakMinutes) : '',
+                    'total_hm'   => !is_null($workMinutes) ? $toHm($workMinutes) : '',
+                    'detail_url' => route('admin.detail', ['id' => $attendance->id]),
+                ];
+            } else {
+                // 勤怠データがない日
+                $dailyAttendanceList[] = [
+                    'date'       => $date->copy(),
+                    'clock_in'   => '',
+                    'clock_out'  => '',
+                    'break_hm'   => '',
+                    'total_hm'   => '',
+                    'detail_url' => null,
+                ];
             }
-            $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
-            if ($workMinutes < 0) $workMinutes = 0;
-
-            $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
-
-            $dailyAttendanceList[] = [
-                'date'       => $date,
-                'clock_in'   => $clockIn,
-                'clock_out'  => $clockOut,
-                'break_hm'   => $breakMinutes ? $toHm($breakMinutes) : '',
-                'total_hm'   => !is_null($workMinutes) ? $toHm($workMinutes) : '',
-                'detail_url' => route('admin.detail', ['id' => $attendance->id]),
-            ];
         }
             
         return view('admin.staff_attendance_list', [

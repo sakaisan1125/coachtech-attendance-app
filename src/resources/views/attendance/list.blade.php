@@ -32,10 +32,10 @@
                 <tr>
                     <!-- <td>{{$day['date']->format('m/d(ddd)')}}</td> -->
                     <td>{{ $day['date']->isoFormat('MM/DD(ddd)') }}</td>
-                    <td>{{ $day['clock_in'] ?: '-' }}</td>
-                    <td>{{ $day['clock_out'] ?: '-' }}</td>
-                    <td>{{ $day['break_hm'] ?: '-' }}</td>
-                    <td>{{ $day['total_hm'] ?: '-' }}</td>
+                    <td>{{ $day['clock_in'] ?: '' }}</td>
+                    <td>{{ $day['clock_out'] ?: '' }}</td>
+                    <td>{{ $day['break_hm'] ?: '' }}</td>
+                    <td>{{ $day['total_hm'] ?: '' }}</td>
                     <td><a class="link" href="{{ $day['detail_url'] }}">詳細</a></td>
                 </tr>
             @endforeach
