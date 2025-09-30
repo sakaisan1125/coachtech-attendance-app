@@ -106,4 +106,23 @@ class AttendanceDetailController extends Controller
         // $br['start'] が「空じゃない」なら → Carbon::parse(...) の結果
         return redirect()->route('attendance.list')->with('success', '勤怠修正を申請しました。');
     }
+
+    public function showByDate(Request $request, string $date)
+    {
+        // 日付のバリデーション
+        try {
+            $d = Carbon::createFromFormat('Y-m-d', $date)->toDateString();
+        } catch (\Throwable $e) {
+            abort(404);
+        }
+
+        // 無ければ作成してIDを取得
+        $attendance = Attendance::firstOrCreate(
+            ['user_id' => $request->user()->id, 'work_date' => $d],
+            ['clock_in_at' => null, 'clock_out_at' => null, 'notes' => null]
+        );
+
+        // show と同じロジックを使うため委譲（Request を渡すのがポイント）
+        return $this->show($request, $attendance->id);
+    }
 }

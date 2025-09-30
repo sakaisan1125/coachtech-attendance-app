@@ -20,7 +20,7 @@ class UserFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'password' => bcrypt('password123'), // テスト用の固定パスワード
-            'role' => 'user', // 必要なら追加
+            'role' => 'user',
         ];
     }
 }

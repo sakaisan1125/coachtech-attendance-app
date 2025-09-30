@@ -8,21 +8,23 @@ use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 
-class UserLoginTest extends TestCase
+class AdminLoginTest extends TestCase
 {
     use RefreshDatabase;
     /**
      * A basic feature test example.
      */
+
+
     #[Test]
     public function email_required(): void
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'user',
+            'role' => 'admin',
         ]);
-
+        
         $response = $this->post('/login', [
             'email' => '',
             'password' => 'password123',
@@ -39,7 +41,7 @@ class UserLoginTest extends TestCase
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'user',
+            'role' => 'admin',
         ]);
 
         $response = $this->post('/login', [
@@ -58,7 +60,7 @@ class UserLoginTest extends TestCase
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'user',
+            'role' => 'admin',
         ]);
 
         $response = $this->post('/login', [

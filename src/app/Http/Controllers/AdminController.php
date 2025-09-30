@@ -114,7 +114,7 @@ class AdminController extends Controller
             'breaks.*.start'     => ['nullable','date_format:H:i'],
             'breaks.*.end'       => ['nullable','date_format:H:i'],
         ],[
-            'notes.required' => '備考を入力してください。',
+            'notes.required' => '備考を入力してください',
         ]);
 
         $workDate = Carbon::parse($attendance->work_date)->toDateString(); // Y-m-d
@@ -300,5 +300,47 @@ class AdminController extends Controller
             'dailyAttendanceList' => $dailyAttendanceList,
         ]);
 
+    }
+
+    public function exportStaffAttendanceCsv(Request $request, $id)
+    {
+        $month = $request->input('month') ?? now()->format('Y-m');
+        $startDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $endDate   = $startDate->copy()->endOfMonth();
+
+        $staff = User::findOrFail($id);
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', $staff->id)
+            ->whereBetween('work_date', [$startDate, $endDate])
+            ->orderBy('work_date')
+            ->get();
+
+        // ヘッダー
+        $csv = "日付,出勤,退勤,休憩,合計,備考\n";
+
+        foreach ($attendances as $attendance) {
+            $date = Carbon::parse($attendance->work_date)->format('Y/m/d');
+            $clockIn = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
+            $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
+            $breakMinutes = 0;
+            foreach ($attendance->breaks as $break) {
+                if ($break->break_start_at && $break->break_end_at) {
+                    $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                }
+            }
+            $toHm = fn($min) => $min ? sprintf('%d:%02d', intdiv($min, 60), $min % 60) : '';
+            $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
+            if ($workMinutes < 0) $workMinutes = 0;
+            $totalHm = !is_null($workMinutes) ? $toHm($workMinutes) : '';
+            $breakHm = $toHm($breakMinutes);
+
+            $csv .= "{$date},{$clockIn},{$clockOut},{$breakHm},{$totalHm},\"{$attendance->notes}\"\n";
+        }
+
+        $filename = "{$staff->name}_{$month}_attendance.csv";
+        $csv = "\xEF\xBB\xBF" . $csv; // 先頭にBOMを追加
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename={$filename}");
     }
 }

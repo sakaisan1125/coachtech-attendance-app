@@ -17,11 +17,11 @@ class RegisterController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
+        $user->sendEmailVerificationNotification();
         // ログイン処理やリダイレクト
         auth()->login($user);
 
-        return redirect()->route('attendance')->with('success', '登録が完了しました');
+        return redirect()->route('verification.notice')->with('success', '登録が完了しました。メール認証をしてください。');
     }
 
     // public function login(LoginRequest $request)
