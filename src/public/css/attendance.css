@@ -126,6 +126,23 @@ body {
     text-decoration: none;
 }
 
+.export-btn-wrapper {
+    text-align: right;
+    margin: 30px 0 120px;
+    /* 下部余白を80px→120pxに変更 */
+}
+
+.btn--primary {
+    display: inline-block;
+    padding: 10px 24px;
+    margin-bottom: 48px;
+    background-color: #000000;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
 /* --- PC (1400px以上) --- */
 @media (min-width: 1400px) {
     .container {
@@ -167,6 +184,13 @@ body {
 
     .link {
         font-size: 22px;
+    }
+
+    .btn--primary {
+        padding: 14px 40px;
+        font-size: 22px;
+        margin-bottom: 64px;
+        border-radius: 6px;
     }
 }
 
@@ -212,6 +236,13 @@ body {
     .link {
         font-size: 15px;
     }
+
+    .btn--primary {
+        padding: 8px 16px;
+        font-size: 15px;
+        margin-bottom: 32px;
+        border-radius: 4px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -238,5 +269,12 @@ body {
 
     .page-title {
         font-size: 17px;
+    }
+
+    .btn--primary {
+        padding: 6px 10px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        border-radius: 3px;
     }
 }

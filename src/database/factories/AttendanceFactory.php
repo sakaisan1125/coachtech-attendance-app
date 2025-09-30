@@ -3,21 +3,18 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Attendance>
- */
 class AttendanceFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'user_id' => null, 
+            'work_date' => Carbon::now()->toDateString(),
+            'status' => 'off_duty',
+            'clock_in_at' => null,
+            'clock_out_at' => null,
         ];
     }
 }

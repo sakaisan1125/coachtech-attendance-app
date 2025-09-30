@@ -3,22 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use App\Models\BreakModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class TimecardController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $today = now()->toDateString();
-
-        $attendance = Attendance::firstOrCreate(
-            ['user_id' => $user->id, 'work_date' => $today],
-            ['status' => 'off_duty']
-        );
-
+        $attendance = $this->todayAttendance($request);
         $breaks = $attendance->breaks()->orderBy('id')->get();
 
         return view('attendance.index', compact('attendance', 'breaks'));
@@ -26,88 +19,50 @@ class TimecardController extends Controller
 
     public function clockIn(Request $request)
     {
-        $user = $request->user();
-        $today = now()->toDateString();
+        $attendance = $this->todayAttendance($request);
 
-        $attendance = Attendance::firstOrCreate(
-            ['user_id' => $user->id, 'work_date' => $today],
-            ['status' => 'off_duty']
-        );
-
-        // if ($attendance->clock_in_at) {
-        //     return back()->with('error', '本日はすでに出勤済みです。');
-        // }
-        // if ($attendance->status !== 'off_duty') {
-        //     return back()->with('error', '現在の状態では出勤できません。');
-        // }
+        if ($attendance->clock_in_at) {
+            return redirect()->route('attendance')->with('info', 'すでに出勤済みです。');
+        }
 
         $attendance->update([
             'clock_in_at' => now(),
             'status'      => 'on_duty',
         ]);
 
-        return back()->with('success', '出勤しました。');
+        return redirect()->route('attendance')->with('success', '出勤しました。');
     }
 
     public function breakStart(Request $request)
     {
         $attendance = $this->todayAttendance($request);
 
-        // if ($attendance->status !== 'on_duty') {
-        //     return back()->with('error', '出勤中のみ休憩に入れます。');
-        // }
-
-        // // 未終了の休憩があるなら弾く
-        // $openBreak = $attendance->breaks()->whereNull('break_end_at')->first();
-        // if ($openBreak) {
-        //     return back()->with('error', 'すでに休憩中です。');
-        // }
-
-        BreakModel::create([
-            'attendance_id'  => $attendance->id,
-            'break_start_at' => now(),
-        ]);
-
+        $attendance->breaks()->create(['break_start_at' => now()]);
         $attendance->update(['status' => 'on_break']);
 
-        return back()->with('success', '休憩に入りました。');
+        return redirect()->route('attendance')->with('success', '休憩に入りました。');
     }
 
     public function breakEnd(Request $request)
     {
         $attendance = $this->todayAttendance($request);
 
-        // if ($attendance->status !== 'on_break') {
-        //     return back()->with('error', '休憩中のみ休憩から戻れます。');
-        // }
-
         $openBreak = $attendance->breaks()->whereNull('break_end_at')->latest('id')->first();
-        // if (!$openBreak) {
-        //     return back()->with('error', '未終了の休憩が見つかりません。');
-        // }
+        if (!$openBreak) {
+            return redirect()->route('attendance')->with('error', '未終了の休憩が見つかりません。');
+        }
 
         $openBreak->update(['break_end_at' => now()]);
         $attendance->update(['status' => 'on_duty']);
 
-        return back()->with('success', '休憩から戻りました。');
+        return redirect()->route('attendance')->with('success', '休憩から戻りました。');
     }
 
     public function clockOut(Request $request)
     {
         $attendance = $this->todayAttendance($request);
 
-        // if (! $attendance->clock_in_at) {
-        //     return back()->with('error', '出勤していません。');
-        // }
-        // if ($attendance->clock_out_at) {
-        //     return back()->with('error', '本日はすでに退勤済みです。');
-        // }
-        // if ($attendance->status === 'on_break') {
-        //     return back()->with('error', '休憩中は退勤できません。先に休憩から戻ってください。');
-        // }
-
         DB::transaction(function () use ($attendance) {
-            // 開きっぱなしの休憩があればクローズしておく（安全策）
             $attendance->breaks()->whereNull('break_end_at')->update(['break_end_at' => now()]);
 
             $attendance->update([
@@ -116,19 +71,36 @@ class TimecardController extends Controller
             ]);
         });
 
-        return back()->with('success', 'お疲れ様でした。');
+        return redirect()->route('attendance')->with('success', 'お疲れ様でした。');
     }
 
+    /**
+     * 今日の勤怠を取得 or 作成
+     */
     private function todayAttendance(Request $request): Attendance
     {
-        $user = $request->user();
-        $today = now()->toDateString();
+        if (!$request->user()) {
+            abort(401);
+        }
 
-        return Attendance::firstOrCreate(
-            ['user_id' => $user->id, 'work_date' => $today],
-            // user_id と work_date が一致する勤怠データを検索
-            ['status' => 'off_duty']
-            // なければ status を 'off_duty' で新規作成
-        );
+        $attendance = Attendance::where('user_id', $request->user()->id)
+            ->whereDate('work_date', now())
+            ->first();
+
+        if ($attendance) {
+            return $attendance;
+        }
+
+        try {
+            return Attendance::create([
+                'user_id'   => $request->user()->id,
+                'work_date' => now(),       // モデルで Y-m-d に正規化される
+                'status'    => 'off_duty',
+            ]);
+        } catch (QueryException $e) {
+            return Attendance::where('user_id', $request->user()->id)
+                ->whereDate('work_date', now())
+                ->firstOrFail();
+        }
     }
 }

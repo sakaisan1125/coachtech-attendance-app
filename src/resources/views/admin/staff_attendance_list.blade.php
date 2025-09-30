@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="container">
-        <h1 class="page-title">{{ $staff->name }}の勤怠一覧</h1>
+        <h1 class="page-title">{{ $staff->name }}さんの勤怠一覧</h1>
         <div class="month-nav">
             <a class="btn" href="{{ route('admin.staff.attendance.list', ['id' => $staff->id, 'month' => $startDate->copy()->subMonth()->format('Y-m')]) }}"><span class="arrow">←</span> 前月</a>
             <div class="month-label">{{ $startDate->format('Y年n月') }}</div>
@@ -41,5 +41,7 @@
             </tbody>
             </table>
         </div>
+        <div class="export-btn-wrapper">
+            <a class="btn btn--primary" href="{{ route('admin.staff.attendance.csv', ['id' => $staff->id, 'month' => $startDate->format('Y-m')]) }}">CSV出力</a>
     </div>
 @endsection
