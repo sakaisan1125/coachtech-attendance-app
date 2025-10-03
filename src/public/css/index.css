@@ -13,14 +13,15 @@ body {
 
 .attendance-status {
     margin-bottom: 24px;
+    font-size: 18px;
 }
 
 .status-label {
     display: inline-block;
-    background: #e0e0e0;
+    background: #C8C8C8;
     color: #555;
     font-size: 1em;
-    border-radius: 12px;
+    border-radius: 50px;
     padding: 4px 16px;
     margin-bottom: 8px;
 }
@@ -33,7 +34,7 @@ body {
 
 .attendance-time {
     font-size: 80px;
-    font-weight: 700;
+    font-weight: bold;
     margin-bottom: 48px;
     letter-spacing: 2px;
 }
@@ -50,20 +51,20 @@ body {
     font-size: 32px;
     font-weight: bold;
     border: none;
-    border-radius: 16px;
+    border-radius: 20px;
     cursor: pointer;
     margin-bottom: 16px;
     transition: opacity 0.2s;
 }
 
 .main-btn {
-    background: #000;
-    color: #fff;
+    background: #000000;
+    color: #ffffff;
 }
 
 .sub-btn {
-    background: #fff;
-    color: #000;
+    background: #ffffff;
+    color: #000000;
     border: 2px solid #eee;
 }
 
@@ -73,10 +74,10 @@ body {
 }
 
 .attendance-message {
-    font-size: 1.2em;
+    font-size: 26px;
     font-weight: bold;
     margin-top: 32px;
-    color: #222;
+    color: #000000;
 }
 
 @media (min-width: 1400px) {

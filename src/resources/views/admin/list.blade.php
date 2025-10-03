@@ -3,7 +3,7 @@
 @section('title', '勤怠一覧（管理者）')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/admin-list.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin_list.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endsection
 
@@ -73,9 +73,13 @@
       </thead>
       <tbody>
         @foreach($attendanceData as $row)
-          <tr>
+           @continue(($row->user->role ?? null) === 'admin') {{-- 念のため管理者は表示しない --}}
+           <tr>
+             <td>{{ $row->user->name }}</td>
+             <td>{{ $row->clock_in_at ? \Carbon\Carbon::parse($row->clock_in_at)->format('H:i') : '-' }}</td>
+          <!-- <tr>
             <td>{{ $row->user->name }}</td>
-            <td>{{ $row->clock_in_at ? \Carbon\Carbon::parse($row->clock_in_at)->format('H:i') : '-' }}</td>
+            <td>{{ $row->clock_in_at ? \Carbon\Carbon::parse($row->clock_in_at)->format('H:i') : '-' }}</td> -->
             <td>{{ $row->clock_out_at ? \Carbon\Carbon::parse($row->clock_out_at)->format('H:i') : '-' }}</td>
             <td>{{ $row->breaks_sum ?? '-' }}</td>
             <td>{{ $row->work_sum ?? '-' }}</td>

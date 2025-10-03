@@ -23,7 +23,6 @@
     {{ \Carbon\Carbon::parse($attendance->work_date)->isoFormat('YYYY年M月D日(ddd)')}}
   </div>
   <div class="attendance-time">
-    <!-- {{ optional($attendance->clock_in_at)->format('HH:mm') ?? '08:00'}} -->
     {{ now()->format('H:i') }}
   </div>
 
@@ -46,7 +45,7 @@
   @elseif ($attendance->status === 'on_break')
     <form method="POST" action="{{route('attendance.break_end')}}">
       @csrf
-      <button class="attendance-btn main-btn">休憩戻</button>
+      <button class="attendance-btn sub-btn">休憩戻</button>
     </form>
   @elseif ($attendance->status === 'clocked_out')
     <div class="attendance-message">お疲れ様でした。</div>

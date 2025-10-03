@@ -2,6 +2,7 @@
 
 @section('css')
   <link rel="stylesheet" href="{{ asset('css/request.css') }}">
+@endsection
 
 @section('title', '申請一覧')
 

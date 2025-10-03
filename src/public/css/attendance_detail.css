@@ -1,7 +1,7 @@
 :root {
     --detail-card: #fff;
-    --detail-line: #ededed;
-    --detail-radius: 16px;
+    --detail-line: #D9D9D9;
+    --detail-radius: 10px;
     --detail-shadow: 0 2px 16px rgba(0, 0, 0, .04);
     --detail-fg: #222;
     --detail-muted: #888;
@@ -24,7 +24,7 @@ body {
 
 .attendance-detail__title {
     margin: 48px auto 48px auto;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: bold;
     letter-spacing: .02em;
     position: relative;
@@ -32,18 +32,19 @@ body {
     text-align: left;
     max-width: 900px;
     width: 100%;
-    border-left: 6px solid #222;
-    color: #222;
+    border-left: 8px solid #000000;
+    color: #000000;
 }
 
 .attendance-detail__card {
     background: var(--detail-card);
-    border: 1.5px solid var(--detail-line);
+    border: 1px solid var(--detail-line);
     border-radius: var(--detail-radius);
-    box-shadow: var(--detail-shadow);
+    /* box-shadow: var(--detail-shadow); */
     max-width: 900px;
     width: 100%;
     margin: 0 auto 0;
+    overflow: hidden;
 }
 
 .attendance-detail__body {
@@ -60,13 +61,14 @@ body {
 .attendance-detail__table th,
 .attendance-detail__table td {
     padding: 20px 0;
-    border-bottom: 1.5px solid var(--detail-line);
+    border-bottom: 2px solid var(--detail-line);
     vertical-align: middle;
     font-size: 17px;
 }
 
 .attendance-detail__table th {
     width: 120px;
+    height: 36px;
     color: var(--detail-muted);
     font-weight: 600;
     letter-spacing: .02em;
@@ -86,10 +88,16 @@ body {
     border-bottom: none;
 }
 
+.attendance-detail__table th,
+.attendance-detail__label {
+    white-space: nowrap;
+    word-break: keep-all;
+}
+
 .attendance-detail__label {
     width: 120px;
     color: var(--detail-muted);
-    font-size: 22px;
+    font-size: 19px;
     font-weight: bold;
     letter-spacing: .02em;
     text-align: left;
@@ -104,7 +112,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 48px;
+    gap: clamp(32px, 6vw, 56px);
     font-weight: bold;
     font-size: 19px;
     letter-spacing: 1px;
@@ -116,16 +124,20 @@ body {
     font-weight: 700;
     text-align: center;
     color: #222;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
 }
 
 .attendance-detail__time-range {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 40px;
 }
 
 .attendance-detail__separator {
-    color: var(--detail-muted);
+    color: #000000;
     font-size: 18px;
 }
 
@@ -134,8 +146,8 @@ body {
     text-align: center;
     padding: 8px 10px;
     border: 1.5px solid var(--detail-line);
-    border-radius: 8px;
-    background: #f7f7f7;
+    border-radius: 4px;
+    background: #ffffff;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
     font-size: 17px;
@@ -147,17 +159,18 @@ body {
 }
 
 .attendance-detail__input-notes {
-    width: 45%;
+    width: 300px;
+    height: 72px;
     padding: 12px 12px;
-    border: 1.5px solid var(--detail-line);
-    border-radius: 8px;
-    background: #f7f7f7;
+    border: 1px solid var(--detail-line);
+    border-radius: 4px;
+    background: #ffffff;
     font-size: 16px;
     margin: 0 auto;
     display: block;
     text-align: left;
     resize: none;
-    color: #222;
+    color: #000000;
 }
 
 .attendance-detail__actions {
@@ -165,17 +178,18 @@ body {
     justify-content: flex-end;
     padding: 32px 0 0 0;
     max-width: 900px;
-    margin-left: 490px;
+    width: 100%;
+    margin: 0 auto 0;
 }
 
 .attendance-detail__button {
     padding: 12px 40px;
-    background: #111;
-    color: #fff;
-    border: 1.5px solid #111;
-    border-radius: 10px;
+    background: #000000;
+    color: #ffffff;
+    /* border: 1.5px solid #000000; */
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     letter-spacing: 2px;
     transition: background 0.2s, opacity .2s, filter .2s;
@@ -203,6 +217,7 @@ body {
     font-weight: 800;
     text-align: center;
     margin-right: 0;
+    transform: translateX(48px);
 }
 
 .alert-success {
@@ -222,7 +237,7 @@ body {
 @media (min-width: 1400px) {
     .attendance-detail__card {
         background: var(--detail-card);
-        border: 1.5px solid var(--detail-line);
+        border: 1px solid var(--detail-line);
         border-radius: var(--detail-radius);
         box-shadow: var(--detail-shadow);
         max-width: 900px;
@@ -247,31 +262,32 @@ body {
     .attendance-detail__table th,
     .attendance-detail__table td {
         padding: 20px 0;
-        border-bottom: 1.5px solid var(--detail-line);
+        border-bottom: 2px solid var(--detail-line);
         vertical-align: middle;
         font-size: 15px;
     }
 
     .attendance-detail__label {
-        width: 130px;
+        width: 120px;
         color: var(--detail-muted);
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
         letter-spacing: .02em;
         text-align: left;
-        padding-left: 32px;
+        padding-left: 30px;
     }
 
     .attendance-detail__actions {
-        max-width: 900px;
+        width: 900px;
         margin-left: 600px;
-        padding-top: 40px;
+        width: 100%;
+        margin: 0 auto 0;
     }
 
     .attendance-detail__button,
     .approved-label,
     .attendance-detail__pending-msg {
-        font-size: 24px;
+        font-size: 18px;
         padding: 16px 56px;
     }
 
@@ -321,9 +337,7 @@ body {
 
     .attendance-detail__actions {
         max-width: 90vw;
-        margin-left: 0;
         padding-top: 18px;
-        justify-content: center;
     }
 
     .attendance-detail__button,
