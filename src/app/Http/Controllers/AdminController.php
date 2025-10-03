@@ -22,8 +22,15 @@ class AdminController extends Controller
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
         // 勤怠データ取得
-        $attendanceData = Attendance::with('user', 'breaks')
+        // $attendanceData = Attendance::with('user', 'breaks')
+        //     ->whereDate('work_date', $date->toDateString())
+        //     ->get()
+        $attendanceData = Attendance::with(['user','breaks'])
             ->whereDate('work_date', $date->toDateString())
+            ->whereHas('user', function ($q) {
+                // 管理者を除外（一般ユーザーのみ）
+                $q->where('role', 'user');
+            })
             ->get()
             ->map(function ($row) {
                 // 出勤・退勤

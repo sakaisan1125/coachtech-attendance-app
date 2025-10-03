@@ -1,16 +1,15 @@
 /* ===== Request List (申請一覧) ===== */
 :root {
-    --line-color: #ddd;
+    --line-color: #E1E1E1;
     --bg-card: #fff;
-    --text-main: #222;
+    --text-main: #000000;
 }
 
-/* タイトル */
 .request-list__title {
     margin: 32px auto 20px;
     font-size: 20px;
     font-weight: 700;
-    max-width: 1000px;
+    max-width: 900px;
     padding-left: 16px;
     position: relative;
 }
@@ -21,18 +20,16 @@
     left: 0;
     top: 2px;
     bottom: 2px;
-    width: 4px;
-    background: #111;
-    border-radius: 2px;
+    width: 8px;
+    background: #000000;
 }
 
-/* タブ */
 .request-list__tabs {
     display: flex;
     gap: 32px;
-    border-bottom: 1px solid var(--line-color);
-    max-width: 1000px;
-    margin: 0 auto 12px;
+    border-bottom: 1px solid #000000;
+    max-width: 900px;
+    margin: 20px auto 48px;
 }
 
 .request-list__tab {
@@ -46,15 +43,14 @@
 
 .request-list__tab.is-active {
     color: var(--text-main);
-    border-color: #111;
+    /* border-color: #111; */
 }
 
-/* カードとテーブル */
 .request-list__card {
     background: var(--bg-card);
     border: 1px solid var(--line-color);
-    border-radius: 8px;
-    max-width: 1000px;
+    border-radius: 10px;
+    max-width: 900px;
     margin: 0 auto;
     overflow: hidden;
 }
@@ -69,24 +65,37 @@
     padding: 12px 24px;
     border-bottom: 1px solid var(--line-color);
     text-align: center;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .request-list__th {
-    background: #fafafa;
+    background: #ffffff;
     font-weight: bold;
-    color: #444;
+    color: #737373;
+    border-bottom: #E1E1E1 3px solid;
+}
+
+.request-list__td {
+    background: #ffffff;
+    font-weight: bold;
+    color: #737373;
+}
+
+.request-list__table th:nth-child(1),
+.request-list__table td:nth-child(1) {
+    white-space: nowrap;
+    word-break: keep-all;
+    min-width: 120px;
 }
 
 .request-list__tr:last-child .request-list__td {
     border-bottom: none;
 }
 
-/* リンク */
 .request-list__link {
     color: #000000;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .request-list__link:hover {
@@ -98,7 +107,7 @@
     .request-list__card,
     .request-list__title,
     .request-list__tabs {
-        max-width: 1200px;
+        max-width: 900px;
     }
 
     .request-list__title {

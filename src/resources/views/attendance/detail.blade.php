@@ -3,29 +3,48 @@
 @section('title', '勤怠詳細')
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
 @endsection
 
 @section('content')
 @php
-    // 日付を一度だけ生成して使い回し
+    // 日付
     $d = $attendance->work_date instanceof \Carbon\Carbon
         ? $attendance->work_date
         : \Carbon\Carbon::parse($attendance->work_date);
 
-    // 休憩を開始時刻でソートし配列化
-    $breakRows = $attendance->breaks
-        ->sortBy('break_start_at')
-        ->values()
-        ->map(function($b){
-            return [
-                'start' => $b->break_start_at?->format('H:i'),
-                'end'   => $b->break_end_at?->format('H:i'),
-            ];
-        })
-        ->toArray();
+    // 入力可否（申請中は編集不可）
+    $inputDisabled = $hasPending ? 'disabled' : '';
 
-    // 空行を1行追加（入力が無くてもUIを揃える）
+    // 休憩行を作成：申請中は申請内容、そうでなければ実績
+    if ($hasPending && isset($correctionRequest) && optional($correctionRequest->breaks)->count()) {
+        $breakRows = $correctionRequest->breaks
+            ->sortBy(fn($b) => $b->index ?? $b->requested_break_start_at)
+            ->values()
+            ->map(function($b){
+                return [
+                    'start' => $b->requested_break_start_at
+                        ? \Carbon\Carbon::parse($b->requested_break_start_at)->format('H:i') : null,
+                    'end'   => $b->requested_break_end_at
+                        ? \Carbon\Carbon::parse($b->requested_break_end_at)->format('H:i') : null,
+                ];
+            })
+            ->toArray();
+    } else {
+        // 実績の休憩
+        $breakRows = $attendance->breaks
+            ->sortBy('break_start_at')
+            ->values()
+            ->map(function($b){
+                return [
+                    'start' => $b->break_start_at?->format('H:i'),
+                    'end'   => $b->break_end_at?->format('H:i'),
+                ];
+            })
+            ->toArray();
+    }
+
+    // 空行を1行追加
     $breakRows[] = ['start' => null, 'end' => null];
     $dash = '';
 @endphp
@@ -56,7 +75,7 @@
                             </td>
                         </tr>
 
-                        {{-- 出勤・退勤 --}}
+                        {{-- 出勤・退勤（申請中は入力不可） --}}
                         <tr class="attendance-detail__row attendance-detail__row--inout">
                             <th class="attendance-detail__label">出勤・退勤</th>
                             <td class="attendance-detail__value">
@@ -64,12 +83,14 @@
                                     <input type="text"
                                         name="clock_in_at"
                                         class="attendance-detail__input-time"
-                                        value="{{ old('clock_in_at', $display['clock_in_at'] ? $display['clock_in_at']->format('H:i') : $dash) }}">
+                                        value="{{ old('clock_in_at', $display['clock_in_at'] ? $display['clock_in_at']->format('H:i') : $dash) }}"
+                                        {{ $inputDisabled }}>
                                     <span class="attendance-detail__separator">〜</span>
                                     <input type="text"
                                         name="clock_out_at"
                                         class="attendance-detail__input-time"
-                                        value="{{ old('clock_out_at', $display['clock_out_at'] ? $display['clock_out_at']->format('H:i') : $dash) }}">
+                                        value="{{ old('clock_out_at', $display['clock_out_at'] ? $display['clock_out_at']->format('H:i') : $dash) }}"
+                                        {{ $inputDisabled }}>
                                     @error('clock_in_at')
                                         <div class="form-error">{{ $message }}</div>
                                     @enderror
@@ -80,7 +101,7 @@
                             </td>
                         </tr>
 
-                        {{-- 休憩（1行目は「休憩」、以降は「休憩2,3…」） --}}
+                        {{-- 休憩（申請中は申請内容を表示し入力不可） --}}
                         @foreach($breakRows as $i => $br)
                             <tr class="attendance-detail__row attendance-detail__row--break">
                                 <th class="attendance-detail__label">{{ $i === 0 ? '休憩' : '休憩'.($i+1) }}</th>
@@ -89,12 +110,14 @@
                                         <input type="text"
                                             name="breaks[{{ $i }}][start]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old("breaks.$i.start", $br['start'] ?? $dash) }}">
+                                            value="{{ old("breaks.$i.start", $br['start'] ?? $dash) }}"
+                                            {{ $inputDisabled }}>
                                         <span class="attendance-detail__separator">〜</span>
                                         <input type="text"
                                             name="breaks[{{ $i }}][end]"
                                             class="attendance-detail__input-time"
-                                            value="{{ old("breaks.$i.end", $br['end'] ?? $dash) }}">
+                                            value="{{ old("breaks.$i.end", $br['end'] ?? $dash) }}"
+                                            {{ $inputDisabled }}>
                                     </div>
                                     @error("breaks.$i.start")
                                         <div class="form-error">{{ $message }}</div>
@@ -105,15 +128,15 @@
                                 </td>
                             </tr>
                         @endforeach
-
                         {{-- 備考 --}}
                         <tr class="attendance-detail__row attendance-detail__row--notes">
                             <th class="attendance-detail__label">備考</th>
                             <td class="attendance-detail__value">
                                 <textarea
-                                class="attendance-detail__input-notes"
-                                name="notes"
-                                rows="3">{{ old('notes', $display['notes'] ?? '') }}</textarea>
+                                  class="attendance-detail__input-notes"
+                                  name="notes"
+                                  rows="3"
+                                  {{ $inputDisabled }}>{{ old('notes', $display['notes'] ?? '') }}</textarea>
                                 @error('notes')
                                     <div class="form-error">{{ $message }}</div>
                                 @enderror

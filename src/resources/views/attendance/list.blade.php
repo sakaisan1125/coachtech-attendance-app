@@ -10,9 +10,19 @@
     <h1 class="page-title">勤怠一覧</h1>
 
     <div class="month-nav">
-        <a class="btn" href="{{ route('attendance.list', ['month' => $prevMonth]) }}"><span class="arrow">←</span> 前月</a>
-        <div class="month-label">{{ $month->format('Y/m')}}</div>
-        <a class="btn" href="{{ route('attendance.list', ['month' => $nextMonth]) }}"> 翌月<span class="arrow">→</span></a>        
+        <!-- <a class="btn" href="{{ route('attendance.list', ['month' => $prevMonth]) }}"><span class="arrow">←</span> 前月</a>
+        <div class="month-label">{{ $month->format('Y/m')}}</div> -->
+        <!-- <a class="btn" href="{{ route('attendance.list', ['month' => $nextMonth]) }}"> 翌月<span class="arrow">→</span></a>         -->
+         <a class="btn" href="{{ route('attendance.list', ['month' => $prevMonth]) }}">
+            <span class="icon-arrow" aria-hidden="true"></span> 前月
+        </a>
+        <div class="month-label">
+            <span class="icon-calendar" aria-hidden="true"></span>
+            {{ $month->format('Y/m') }}
+        </div>
+        <a class="btn" href="{{ route('attendance.list', ['month' => $nextMonth]) }}">
+            翌月 <span class="icon-arrow icon-arrow--right" aria-hidden="true"></span>
+        </a>
     </div>
 
     <div class="card">

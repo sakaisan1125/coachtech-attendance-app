@@ -8,11 +8,18 @@
 
 @section('content')
     <div class="container">
-        <h1 class="page-title">{{ $staff->name }}さんの勤怠一覧</h1>
+        <h1 class="page-title">{{ $staff->name }}さんの勤怠</h1>
         <div class="month-nav">
-            <a class="btn" href="{{ route('admin.staff.attendance.list', ['id' => $staff->id, 'month' => $startDate->copy()->subMonth()->format('Y-m')]) }}"><span class="arrow">←</span> 前月</a>
-            <div class="month-label">{{ $startDate->format('Y年n月') }}</div>
-            <a class="btn" href="{{ route('admin.staff.attendance.list', ['id' => $staff->id, 'month' => $startDate->copy()->addMonth()->format('Y-m')]) }}"> 翌月<span class="arrow">→</span></a>
+            <a class="btn" href="{{ route('admin.staff.attendance.list', ['id' => $staff->id, 'month' => $startDate->copy()->subMonth()->format('Y-m')]) }}">
+                <span class="icon-arrow icon-arrow--left" aria-hidden="true"></span> 前月
+            </a>
+            <div class="month-label">
+                <span class="icon-calendar" aria-hidden="true"></span>
+               {{ $startDate->format('Y/m') }}
+            </div>
+            <a class="btn" href="{{ route('admin.staff.attendance.list', ['id' => $staff->id, 'month' => $startDate->copy()->addMonth()->format('Y-m')]) }}">
+                翌月 <span class="icon-arrow icon-arrow--right" aria-hidden="true"></span>
+            </a>
         </div>
 
         <div class="card">

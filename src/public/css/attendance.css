@@ -3,7 +3,7 @@
     --muted: #666;
     --bg: #f3f3f3;
     --card: #fff;
-    --line: #e6e6e6;
+    --line: #E1E1E1;
 }
 
 * {
@@ -19,17 +19,17 @@ body {
 
 .container {
     max-width: 900px;
-    margin: 36px auto;
+    margin: 48px auto;
     padding: 0 12px;
 }
 
 .page-title {
     margin: 36px 0 20px;
-    font-size: 24px;
+    font-size: 30px;
     font-weight: bold;
-    color: #222;
+    color: #000000;
     letter-spacing: 1px;
-    border-left: #0a0a0a 6px solid;
+    border-left: #000000 8px solid;
     padding-left: 12px;
 }
 
@@ -38,10 +38,11 @@ body {
     align-items: center;
     background-color: #ffffff;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 10px;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 36px;
     padding:0 24px;
+    height: 60px;
 }
 
 .month-nav .btn {
@@ -52,6 +53,42 @@ body {
     font-weight: bold;
     font-size: 15px;
     transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-arrow {
+    display: inline-block;
+    width: 20px;
+    height: 15px;
+    background: url('../images/arrow-left.png') no-repeat center / contain;
+    vertical-align: middle;
+    background-size: contain;
+    flex: 0 0 22px;
+    vertical-align: middle;
+    /* color: #737373; */
+    color: #9ca3af;
+    opacity: .55;
+    filter: none;
+    /* background-color: currentColor; */
+}
+
+/* 右向きは水平反転で再利用 */
+.icon-arrow--right {
+    transform: scaleX(-1);
+}
+
+.icon-calendar {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    background: url('/images/calendar.png') no-repeat center / contain;
+    /* ← 画像をそのまま表示 */
+    vertical-align: middle;
+    filter: grayscale(1) brightness(0.95);
+    /* 薄いグレーに見せる（任意で調整） */
 }
 
 .month-nav .btn:hover {
@@ -59,16 +96,23 @@ body {
 }
 
 .month-nav .month-label {
-    flex: 1;
-    text-align: center;
-    font-weight: 700;
-    font-size: 17px;
-    color: #222;
-    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 20px;
+    color: #000000;
+
+}
+
+.month-nav .month-label:hover .icon-calendar {
+    filter: grayscale(1) brightness(0.4);
+    /* ちょい濃く（任意） */
 }
 
 .arrow {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     vertical-align: middle;
 }
@@ -92,16 +136,16 @@ body {
 .table th,
 .table td {
     padding: 12px 16px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 2px solid var(--line);
     text-align: center;
 }
 
 .table th {
     background: #ffffff;
     font-weight: 700;
-    color: #505050;
+    color: #737373;
     font-size: 18px;
-    border-bottom: #c9c9c9 2px solid;
+    border-bottom: #c9c9c9 3px solid;
 }
 
 .table tr:last-child td {
@@ -110,7 +154,7 @@ body {
 
 .table td {
     font-size: 18px;
-    color: #616161;
+    color: #737373;
     font-weight: bold;
 }
 
@@ -118,7 +162,7 @@ body {
     color: #000000;
     text-decoration: none;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .link:hover {
@@ -129,18 +173,18 @@ body {
 .export-btn-wrapper {
     text-align: right;
     margin: 30px 0 120px;
-    /* 下部余白を80px→120pxに変更 */
 }
 
 .btn--primary {
     display: inline-block;
-    padding: 10px 24px;
+    padding: 10px 20px;
     margin-bottom: 48px;
     background-color: #000000;
     color: #ffffff;
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 5px;
     font-weight: bold;
+    font-size: 22px;
     transition: background-color 0.3s ease;
 }
 /* --- PC (1400px以上) --- */
