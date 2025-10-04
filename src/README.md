@@ -34,6 +34,10 @@ docker compose exec php bash -lc '
 3) アクセス
 - http://localhost
 
+## ログインURL
+- 一般: http://localhost/login
+- 管理: http://localhost/admin/login
+
 ## 主な画面/ルート
 - /attendance（打刻）
 - /attendance/list?month=YYYY-MM（一覧）
