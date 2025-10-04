@@ -90,7 +90,3 @@ docker compose exec php bash -lc 'cd /var/www/html/src && php artisan migrate:fr
 
 ## ER 図
 ![ER 図](/er-diagram.png)
-
-## ログインURL
-- 一般: http://localhost/login
-- 管理: http://localhost/admin/login
