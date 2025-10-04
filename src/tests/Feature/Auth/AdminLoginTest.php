@@ -11,10 +11,6 @@ use App\Models\User;
 class AdminLoginTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
-
 
     #[Test]
     public function email_required(): void
@@ -24,14 +20,14 @@ class AdminLoginTest extends TestCase
             'password' => bcrypt('password123'),
             'role' => 'admin',
         ]);
-        
+
         $response = $this->post('/login', [
             'email' => '',
             'password' => 'password123',
         ]);
 
         $response->assertSessionHasErrors([
-            'email' => 'メールアドレスを入力してください'
+            'email' => 'メールアドレスを入力してください',
         ]);
     }
 
@@ -50,7 +46,7 @@ class AdminLoginTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors([
-            'password' => 'パスワードを入力してください'
+            'password' => 'パスワードを入力してください',
         ]);
     }
 
@@ -68,7 +64,9 @@ class AdminLoginTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertSessionHasErrors(['auth' => 'ログイン情報が登録されていません']);
+        $response->assertSessionHasErrors([
+            'auth' => 'ログイン情報が登録されていません',
+        ]);
         $response->assertRedirect();
     }
 }

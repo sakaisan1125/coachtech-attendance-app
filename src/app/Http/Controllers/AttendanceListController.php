@@ -10,18 +10,15 @@ use Illuminate\Http\Request;
 class AttendanceListController extends Controller
 {
     public function index(Request $request)
-    {   
+    {
         Carbon::setLocale('ja');
 
         $currentUser = $request->user();
-
-        // ?month=YYYY-MM（省略時は今月）
         $monthString = $request->query('month', now()->format('Y-m'));
         $firstDayOfMonth = Carbon::createFromFormat('Y-m', $monthString)->startOfMonth();
         $startDate = $firstDayOfMonth->copy();
-        $endDate   = $firstDayOfMonth->copy()->endOfMonth();
+        $endDate = $firstDayOfMonth->copy()->endOfMonth();
 
-        // 今月の勤怠＋休憩をまとめて取得
         $attendanceRecords = Attendance::with('breaks')
             ->where('user_id', $currentUser->id)
             ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
@@ -37,14 +34,12 @@ class AttendanceListController extends Controller
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             $dateKey = $date->toDateString();
 
-            // コレクションに無ければフォールバック（まれな取りこぼし対策）
             $attendance = $attendanceRecords->get($dateKey)
                 ?? Attendance::with('breaks')
                     ->where('user_id', $currentUser->id)
                     ->whereDate('work_date', $dateKey)
                     ->first();
 
-            // 申請（pending/approved）を取得（存在すれば表示値を上書き）
             $correctionRequest = $attendance
                 ? CorrectionRequest::with('breaks')
                     ->where('attendance_id', $attendance->id)
@@ -56,8 +51,7 @@ class AttendanceListController extends Controller
             $isPending = $correctionRequest && $correctionRequest->status === 'pending';
 
             if ($isPending) {
-                // 申請内容を優先（安全に parse）
-                $clockInTime  = $correctionRequest?->requested_clock_in_at
+                $clockInTime = $correctionRequest?->requested_clock_in_at
                     ? Carbon::parse($correctionRequest->requested_clock_in_at)->format('H:i')
                     : '';
                 $clockOutTime = $correctionRequest?->requested_clock_out_at
@@ -67,19 +61,18 @@ class AttendanceListController extends Controller
                 foreach ($correctionRequest->breaks ?? [] as $break) {
                     if ($break->requested_break_start_at && $break->requested_break_end_at) {
                         $start = Carbon::parse($break->requested_break_start_at);
-                        $end   = Carbon::parse($break->requested_break_end_at);
+                        $end = Carbon::parse($break->requested_break_end_at);
                         $totalBreakMinutes += $start->diffInMinutes($end);
                     }
                 }
             } else {
-                // attendance の値を優先（cast 有無に依存しない計算）
-                $clockInTime  = $attendance?->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : '';
+                $clockInTime = $attendance?->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : '';
                 $clockOutTime = $attendance?->clock_out_at ? Carbon::parse($attendance->clock_out_at)->format('H:i') : '';
                 $totalBreakMinutes = 0;
                 foreach ($attendance?->breaks ?? [] as $break) {
                     if (!empty($break->break_start_at) && !empty($break->break_end_at)) {
                         $start = $break->break_start_at instanceof Carbon ? $break->break_start_at : Carbon::parse($break->break_start_at);
-                        $end   = $break->break_end_at   instanceof Carbon ? $break->break_end_at   : Carbon::parse($break->break_end_at);
+                        $end = $break->break_end_at instanceof Carbon ? $break->break_end_at : Carbon::parse($break->break_end_at);
                         $totalBreakMinutes += $start->diffInMinutes($end);
                     }
                 }
@@ -87,24 +80,22 @@ class AttendanceListController extends Controller
 
             $totalWorkMinutes = null;
             if ($clockInTime && $clockOutTime) {
-                $in  = Carbon::createFromFormat('H:i', $clockInTime);
+                $in = Carbon::createFromFormat('H:i', $clockInTime);
                 $out = Carbon::createFromFormat('H:i', $clockOutTime);
                 $totalWorkMinutes = max(0, $out->diffInMinutes($in) * -1 - $totalBreakMinutes);
-                // diff は絶対値なので out>in を前提に逆算（勤務で in<out のため上記式）
             }
 
-            // 勤務のない日も“詳細”押下可能にする
             $detailUrl = $attendance
                 ? "/attendance/detail/{$attendance->id}"
                 : route('attendance.detail.by_date', ['date' => $dateKey]);
 
             $dailyAttendanceList[] = [
-                'date'        => $date->copy(),
-                'clock_in'    => $clockInTime,
-                'clock_out'   => $clockOutTime,
-                'break_hm'    => $totalBreakMinutes ? $this->toHm($totalBreakMinutes) : '',
-                'total_hm'    => is_null($totalWorkMinutes) ? '' : $this->toHm($totalWorkMinutes),
-                'detail_url'  => $detailUrl,
+                'date' => $date->copy(),
+                'clock_in' => $clockInTime,
+                'clock_out' => $clockOutTime,
+                'break_hm' => $totalBreakMinutes ? $this->toHm($totalBreakMinutes) : '',
+                'total_hm' => is_null($totalWorkMinutes) ? '' : $this->toHm($totalWorkMinutes),
+                'detail_url' => $detailUrl,
             ];
         }
 
@@ -112,10 +103,10 @@ class AttendanceListController extends Controller
         $nextMonth = $firstDayOfMonth->copy()->addMonth()->format('Y-m');
 
         return view('attendance.list', [
-            'month'        => $firstDayOfMonth,
-            'days'         => $dailyAttendanceList,
-            'prevMonth'    => $previousMonth,
-            'nextMonth'    => $nextMonth,
+            'month' => $firstDayOfMonth,
+            'days' => $dailyAttendanceList,
+            'prevMonth' => $previousMonth,
+            'nextMonth' => $nextMonth,
         ]);
     }
 

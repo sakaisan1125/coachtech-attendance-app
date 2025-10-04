@@ -40,7 +40,6 @@ body {
     background: var(--detail-card);
     border: 1px solid var(--detail-line);
     border-radius: var(--detail-radius);
-    /* box-shadow: var(--detail-shadow); */
     max-width: 900px;
     width: 100%;
     margin: 0 auto 0;
@@ -186,13 +185,12 @@ body {
     padding: 12px 40px;
     background: #000000;
     color: #ffffff;
-    /* border: 1.5px solid #000000; */
     border-radius: 5px;
     cursor: pointer;
     font-size: 22px;
     font-weight: bold;
     letter-spacing: 2px;
-    transition: background 0.2s, opacity .2s, filter .2s;
+    transition: background .2s, opacity .2s, filter .2s;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
 }
@@ -278,8 +276,6 @@ body {
     }
 
     .attendance-detail__actions {
-        width: 900px;
-        margin-left: 600px;
         width: 100%;
         margin: 0 auto 0;
     }
@@ -302,7 +298,6 @@ body {
     }
 }
 
-/* --- タブレット (768px〜850px) --- */
 @media (min-width: 768px) and (max-width: 850px) {
     .attendance-detail__card {
         max-width: 90vw;

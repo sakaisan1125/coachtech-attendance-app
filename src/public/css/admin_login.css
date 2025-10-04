@@ -26,7 +26,7 @@
 .admin-login__field input {
     width: 100%;
     padding: 18px 10px;
-    border: 1px solid #000000;
+    border: 1px solid #000;
     border-radius: 4px;
     height: 60px;
 }
@@ -34,7 +34,7 @@
 .admin-login__btn {
     width: 100%;
     padding: 14px 10px;
-    background: #000000;
+    background: #000;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -49,7 +49,6 @@
     background: #333;
 }
 
-/* --- PC (1400px以上) --- */
 @media (min-width: 1400px) {
     .admin-login {
         max-width: 700px;
@@ -74,7 +73,6 @@
     }
 }
 
-/* --- タブレット (768px〜850px) --- */
 @media (min-width: 768px) and (max-width: 850px) {
     .admin-login {
         max-width: 96vw;
@@ -99,7 +97,6 @@
     }
 }
 
-/* --- スマホ (640px以下) --- */
 @media (max-width: 640px) {
     .admin-login {
         max-width: 100vw;

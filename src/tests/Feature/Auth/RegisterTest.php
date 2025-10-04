@@ -10,13 +10,11 @@ use PHPUnit\Framework\Attributes\Test;
 class RegisterTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
+
     #[Test]
     public function name_required(): void
     {
-        $response = $this->post('/register',[
+        $response = $this->post('/register', [
             'name' => '',
             'email' => 'test@example.com',
             'password' => 'password123',
@@ -31,7 +29,7 @@ class RegisterTest extends TestCase
     #[Test]
     public function email_required(): void
     {
-        $response = $this->post('/register',[
+        $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => '',
             'password' => 'password123',
@@ -46,7 +44,7 @@ class RegisterTest extends TestCase
     #[Test]
     public function password_must_be_at_least_8_characters(): void
     {
-        $response = $this->post('/register',[
+        $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => '1234567',
@@ -61,7 +59,7 @@ class RegisterTest extends TestCase
     #[Test]
     public function password_confirmation_different(): void
     {
-        $response = $this->post('/register',[
+        $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password123',
@@ -76,7 +74,7 @@ class RegisterTest extends TestCase
     #[Test]
     public function password_required(): void
     {
-        $response = $this->post('/register',[
+        $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => '',
@@ -89,7 +87,7 @@ class RegisterTest extends TestCase
     }
 
     #[Test]
-     public function user_can_register_with_valid_input()
+    public function user_can_register_with_valid_input()
     {
         $response = $this->post('/register', [
             'name' => 'テストユーザー',

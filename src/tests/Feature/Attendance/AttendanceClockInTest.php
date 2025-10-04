@@ -3,7 +3,6 @@
 namespace Tests\Feature\Attendance;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
@@ -12,24 +11,19 @@ use App\Models\Attendance;
 class AttendanceClockInTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
+
     #[Test]
     public function test_show_clock_in_button_and_clock_in(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user);
 
-        // 画面表示で勤怠が自動作成される
         $response = $this->get('/attendance');
         $response->assertSee('出勤');
 
-        // 出勤処理
         $postResponse = $this->post(route('attendance.clock_in'));
         $postResponse->assertRedirect('/attendance');
 
-        // 勤怠レコードを取得して検証
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('work_date', now())
             ->first();
@@ -47,10 +41,9 @@ class AttendanceClockInTest extends TestCase
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user);
 
-        // 勤怠レコードを事前に作成
         Attendance::factory()->create([
-            'user_id' => $user->id,
-            'status' => 'clocked_out',
+            'user_id'   => $user->id,
+            'status'    => 'clocked_out',
             'work_date' => now()->toDateString(),
         ]);
 
@@ -64,10 +57,7 @@ class AttendanceClockInTest extends TestCase
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user);
 
-        // 画面表示で勤怠を自動作成
         $this->get('/attendance');
-
-        // 出勤処理
         $this->post(route('attendance.clock_in'));
 
         $attendance = Attendance::where('user_id', $user->id)

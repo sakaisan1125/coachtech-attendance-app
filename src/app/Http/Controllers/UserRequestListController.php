@@ -18,7 +18,7 @@ class UserRequestListController extends Controller
 
         return view('attendance.request', [
             'activeTab' => 'pending',
-            'rows'      => $rows,
+            'rows' => $rows,
         ]);
     }
 
@@ -33,7 +33,7 @@ class UserRequestListController extends Controller
 
         return view('attendance.request', [
             'activeTab' => 'approved',
-            'rows'      => $rows,
+            'rows' => $rows,
         ]);
     }
 }

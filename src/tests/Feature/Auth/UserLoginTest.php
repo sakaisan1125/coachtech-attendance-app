@@ -11,13 +11,11 @@ use App\Models\User;
 class UserLoginTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
+
     #[Test]
     public function email_required(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
             'role' => 'user',
@@ -36,7 +34,7 @@ class UserLoginTest extends TestCase
     #[Test]
     public function password_required(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
             'role' => 'user',
@@ -55,7 +53,7 @@ class UserLoginTest extends TestCase
     #[Test]
     public function user_can_login_with_correct_credentials(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
             'role' => 'user',

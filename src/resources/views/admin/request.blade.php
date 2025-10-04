@@ -9,12 +9,9 @@
 @section('content')
   <h1 class="request-list__title">申請一覧</h1>
 
-  {{-- タブ切替（同一パスだがコントローラ振り分けで管理者ビューに遷移） --}}
   <div class="request-list__tabs">
-    <a class="request-list__tab {{ $activeTab==='pending' ? 'is-active' : '' }}"
-       href="{{ route('requests.pending') }}">承認待ち</a>
-    <a class="request-list__tab {{ $activeTab==='approved' ? 'is-active' : '' }}"
-       href="{{ route('requests.approved') }}">承認済み</a>
+    <a class="request-list__tab {{ $activeTab==='pending' ? 'is-active' : '' }}" href="{{ route('requests.pending') }}">承認待ち</a>
+    <a class="request-list__tab {{ $activeTab==='approved' ? 'is-active' : '' }}" href="{{ route('requests.approved') }}">承認済み</a>
   </div>
 
   <div class="request-list__card">
@@ -32,12 +29,12 @@
       <tbody>
         @forelse ($rows as $r)
           @php
-            $user   = $r->attendance?->user;
-            $name   = $user?->name ?? '－';
-            $work   = optional($r->attendance?->work_date)->format('Y/m/d');
-            $applied= optional($r->created_at)->format('Y/m/d');
-            $reason = $r->requested_notes ?: '（なし）';
-            $state  = $r->status === 'approved' ? '承認済み' : '承認待ち';
+            $user    = $r->attendance?->user;
+            $name    = $user?->name ?? '－';
+            $work    = optional($r->attendance?->work_date)->format('Y/m/d');
+            $applied = optional($r->created_at)->format('Y/m/d');
+            $reason  = $r->requested_notes ?: '（なし）';
+            $state   = $r->status === 'approved' ? '承認済み' : '承認待ち';
           @endphp
           <tr class="request-list__tr">
             <td class="request-list__td">{{ $state }}</td>
@@ -58,9 +55,8 @@
     </table>
   </div>
 
-  {{-- ページネーションを使う場合は $rows を paginate にしてこのブロックを生かす --}}
-  @if(method_exists($rows, 'links'))
-    <div style="max-width:1000px;margin:12px auto 0;">
+  @if (method_exists($rows, 'links'))
+    <div style="max-width:1000px; margin:12px auto 0;">
       {{ $rows->links() }}
     </div>
   @endif
