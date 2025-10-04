@@ -33,13 +33,13 @@ body {
     text-decoration: none;
     font-weight: bold;
     font-size: 24px;
-    transition: opacity 0.3s;
+    transition: opacity .3s;
     height: 29px;
 }
 
 .register-wrap {
     max-width: 500px;
-    margin: 48px auto 0 auto;
+    margin: 48px auto 0;
     padding: 32px 24px;
     background: #fff;
     border-radius: 8px;
@@ -73,22 +73,22 @@ body {
 .register-group input {
     padding: 8px;
     font-size: 24px;
-    border: 1px solid #000000;
+    border: 1px solid #000;
     border-radius: 4px;
     background: #fff;
 }
 
 .form-error {
     color: #e74c3c;
-    font-size: 0.95em;
+    font-size: .95em;
     margin-top: 4px;
 }
 
 .register-btn {
     margin-top: 24px;
     padding: 10px 0;
-    background: #000000;
-    color: #ffffff;
+    background: #000;
+    color: #fff;
     font-size: 26px;
     font-weight: bold;
     border: none;
@@ -109,7 +109,7 @@ body {
 
 .login-wrap {
     max-width: 500px;
-    margin: 48px auto 0 auto;
+    margin: 48px auto 0;
     padding: 32px 24px;
     background: #fff;
     border-radius: 8px;
@@ -144,16 +144,16 @@ body {
 .login-group input {
     padding: 8px;
     font-size: 24px;
-    border: 1px solid #000000;
+    border: 1px solid #000;
     border-radius: 4px;
-    background: #ffffff;
+    background: #fff;
 }
 
 .login-btn {
     margin-top: 24px;
     padding: 12px 0;
-    background: #000000;
-    color: #ffffff;
+    background: #000;
+    color: #fff;
     font-size: 26px;
     font-weight: bold;
     border: none;
@@ -172,7 +172,6 @@ body {
     font-size: 20px;
 }
 
-/* --- PC (1400px以上) --- */
 @media (min-width: 1400px) {
 
     .register-wrap,
@@ -199,7 +198,6 @@ body {
     }
 }
 
-/* --- タブレット (768px〜850px) --- */
 @media (min-width: 768px) and (max-width: 850px) {
 
     .register-wrap,
@@ -222,17 +220,16 @@ body {
     }
 
     .form-error {
-        font-size: 0.95em;
+        font-size: .95em;
     }
 
     .register-group input,
     .login-group input {
-        font-size: 0.95em;
+        font-size: .95em;
         padding: 6px;
     }
 }
 
-/* --- スマホ (640px以下) --- */
 @media (max-width: 640px) {
 
     .register-wrap,
@@ -255,12 +252,12 @@ body {
     }
 
     .form-error {
-        font-size: 0.9em;
+        font-size: .9em;
     }
 
     .register-group input,
     .login-group input {
-        font-size: 0.9em;
+        font-size: .9em;
         padding: 4px;
     }
 }

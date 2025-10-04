@@ -21,23 +21,16 @@ class AdminController extends Controller
 
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        // 勤怠データ取得
-        // $attendanceData = Attendance::with('user', 'breaks')
-        //     ->whereDate('work_date', $date->toDateString())
-        //     ->get()
-        $attendanceData = Attendance::with(['user','breaks'])
+        $attendanceData = Attendance::with(['user', 'breaks'])
             ->whereDate('work_date', $date->toDateString())
             ->whereHas('user', function ($q) {
-                // 管理者を除外（一般ユーザーのみ）
                 $q->where('role', 'user');
             })
             ->get()
             ->map(function ($row) {
-                // 出勤・退勤
-                $clockIn  = $row->clock_in_at;
+                $clockIn = $row->clock_in_at;
                 $clockOut = $row->clock_out_at;
 
-                // 休憩合計（分）
                 $breakMinutes = 0;
                 foreach ($row->breaks as $break) {
                     if ($break->break_start_at && $break->break_end_at && $break->break_end_at > $break->break_start_at) {
@@ -45,19 +38,18 @@ class AdminController extends Controller
                     }
                 }
 
-                // 労働合計（分）
                 $workMinutes = null;
                 if ($clockIn && $clockOut && $clockOut > $clockIn) {
                     $workMinutes = $clockIn->diffInMinutes($clockOut) - $breakMinutes;
-                    if ($workMinutes < 0) $workMinutes = 0;
+                    if ($workMinutes < 0) {
+                        $workMinutes = 0;
+                    }
                 }
 
-                // H:i形式に変換
                 $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
 
                 $row->breaks_sum = $breakMinutes ? $toHm($breakMinutes) : '';
-                $row->work_sum   = !is_null($workMinutes) ? $toHm($workMinutes) : '';
-
+                $row->work_sum = !is_null($workMinutes) ? $toHm($workMinutes) : '';
                 return $row;
             });
 
@@ -67,20 +59,18 @@ class AdminController extends Controller
     public function adminRequestPending(Request $request)
     {
         $rows = CorrectionRequest::with(['attendance.user'])->where('status', 'pending')->latest('id')->get();
-
         return view('admin.request', ['activeTab' => 'pending', 'rows' => $rows]);
     }
 
     public function adminRequestApproved(Request $request)
     {
         $rows = CorrectionRequest::with(['attendance.user'])->where('status', 'approved')->latest('approved_at')->get();
-
         return view('admin.request', ['activeTab' => 'approved', 'rows' => $rows]);
     }
 
     public function adminAttendanceShow(Request $request, int $id)
     {
-        $attendance = Attendance::with(['user','breaks'])->findOrFail($id);
+        $attendance = Attendance::with(['user', 'breaks'])->findOrFail($id);
 
         $correctionRequest = CorrectionRequest::with('breaks')
             ->where('attendance_id', $attendance->id)
@@ -91,65 +81,59 @@ class AdminController extends Controller
 
         return view('admin.detail', [
             'attendance' => $attendance,
-            'user'       => $attendance->user,
-            'workDate'   => Carbon::parse($attendance->work_date)->format('Y年n月j日'),
-            // 画面は H:i 表示に揃える
-            'clockIn'    => $attendance->clock_in_at?->format('H:i'),
-            'clockOut'   => $attendance->clock_out_at?->format('H:i'),
-            'breaks'     => $attendance->breaks->map(fn($b)=>[
-                                'start'=>$b->break_start_at?->format('H:i'),
-                                'end'  =>$b->break_end_at?->format('H:i'),
-                            ])->values()->all(),
+            'user' => $attendance->user,
+            'workDate' => Carbon::parse($attendance->work_date)->format('Y年n月j日'),
+            'clockIn' => $attendance->clock_in_at?->format('H:i'),
+            'clockOut' => $attendance->clock_out_at?->format('H:i'),
+            'breaks' => $attendance->breaks->map(fn($b) => [
+                'start' => $b->break_start_at?->format('H:i'),
+                'end' => $b->break_end_at?->format('H:i'),
+            ])->values()->all(),
             'hasPending' => $hasPending,
         ]);
     }
 
-    /**
-     * 勤怠の管理者修正（直接反映）
-     */
     public function adminAttendanceUpdate(Request $request, int $id)
     {
         $attendance = Attendance::with('breaks')->findOrFail($id);
 
-        // 入力値（H:i 形式）。未入力は null 許容
         $data = $request->validate([
-            'clock_in'           => ['nullable','date_format:H:i'],
-            'clock_out'          => ['nullable','date_format:H:i'],
-            'notes'              => ['required','string','max:1000'],
-            // 休憩は可変配列 breaks[n][start/end]
-            'breaks'             => ['array'],
-            'breaks.*.start'     => ['nullable','date_format:H:i'],
-            'breaks.*.end'       => ['nullable','date_format:H:i'],
-        ],[
+            'clock_in' => ['nullable', 'date_format:H:i'],
+            'clock_out' => ['nullable', 'date_format:H:i'],
+            'notes' => ['required', 'string', 'max:1000'],
+            'breaks' => ['array'],
+            'breaks.*.start' => ['nullable', 'date_format:H:i'],
+            'breaks.*.end' => ['nullable', 'date_format:H:i'],
+        ], [
             'notes.required' => '備考を入力してください',
         ]);
 
-        $workDate = Carbon::parse($attendance->work_date)->toDateString(); // Y-m-d
+        $workDate = Carbon::parse($attendance->work_date)->toDateString();
 
-        // H:i を当日の DateTime へ
-        $toDateTime = function(?string $hm) use ($workDate) {
-            if (!$hm) return null;
+        $toDateTime = function (?string $hm) use ($workDate) {
+            if (!$hm) {
+                return null;
+            }
             return Carbon::createFromFormat('Y-m-d H:i', "$workDate $hm");
         };
 
-        $clockIn  = $toDateTime($data['clock_in']  ?? null);
+        $clockIn = $toDateTime($data['clock_in'] ?? null);
         $clockOut = $toDateTime($data['clock_out'] ?? null);
 
-        // 相関チェック
         if ($clockIn && $clockOut && $clockIn->gte($clockOut)) {
             return back()->withInput()->withErrors([
                 'clock_out' => '出勤時間もしくは退勤時間が不適切な値です',
             ]);
         }
 
-        // 休憩の検証（順序：出勤 <= 休憩開始 < 休憩終了 <= 退勤）
         $breakPayloads = [];
         foreach ($data['breaks'] ?? [] as $i => $br) {
             $start = $toDateTime($br['start'] ?? null);
-            $end   = $toDateTime($br['end']   ?? null);
+            $end = $toDateTime($br['end'] ?? null);
 
-            // 片方だけの入力は無視（空行的な扱い）
-            if (!$start && !$end) continue;
+            if (!$start && !$end) {
+                continue;
+            }
 
             if (!$start || !$end || ($start && $end && $start->gte($end))) {
                 return back()->withInput()->withErrors([
@@ -167,35 +151,32 @@ class AdminController extends Controller
                 ]);
             }
 
-            $breakPayloads[] = ['break_start_at'=>$start, 'break_end_at'=>$end];
+            $breakPayloads[] = ['break_start_at' => $start, 'break_end_at' => $end];
         }
 
         DB::transaction(function () use ($attendance, $clockIn, $clockOut, $data, $breakPayloads) {
-            // 勤怠の更新
-            $attendance->clock_in_at  = $clockIn;
+            $attendance->clock_in_at = $clockIn;
             $attendance->clock_out_at = $clockOut;
-            $attendance->notes        = $data['notes'] ?? null;
+            $attendance->notes = $data['notes'] ?? null;
             $attendance->save();
 
-            // 休憩は入れ替え
             BreakModel::where('attendance_id', $attendance->id)->delete();
             foreach ($breakPayloads as $bp) {
                 BreakModel::create([
-                    'attendance_id'  => $attendance->id,
+                    'attendance_id' => $attendance->id,
                     'break_start_at' => $bp['break_start_at'],
-                    'break_end_at'   => $bp['break_end_at'],
+                    'break_end_at' => $bp['break_end_at'],
                 ]);
             }
         });
 
-        return redirect()->route('admin.attendance.list', ['id'=>$attendance->id])
-            ->with('success','修正しました。');
+        return redirect()->route('admin.attendance.list', ['id' => $attendance->id])
+            ->with('success', '修正しました。');
     }
 
     public function showApproveRequest(Request $request, CorrectionRequest $attendance_correct_request)
     {
         $correctionRequest = CorrectionRequest::with(['attendance.user', 'breaks'])->findOrFail($attendance_correct_request->id);
-
         $attendance = $correctionRequest->attendance;
         $user = $attendance->user;
         $hasPending = $correctionRequest->status === 'pending';
@@ -213,20 +194,20 @@ class AdminController extends Controller
     public function approveCorrectionRequest(Request $request, CorrectionRequest $attendance_correct_request)
     {
         $attendance = $attendance_correct_request->attendance;
-        $attendance->clock_in_at  = $attendance_correct_request->requested_clock_in_at;
+        $attendance->clock_in_at = $attendance_correct_request->requested_clock_in_at;
         $attendance->clock_out_at = $attendance_correct_request->requested_clock_out_at;
-        $attendance->notes        = $attendance_correct_request->requested_notes;
+        $attendance->notes = $attendance_correct_request->requested_notes;
         $attendance->save();
 
-        $attendance_correct_request ->status = 'approved';
-        $attendance_correct_request ->approved_at = now();
-        $attendance_correct_request ->approved_by = Auth::id();
-        $attendance_correct_request ->save();
+        $attendance_correct_request->status = 'approved';
+        $attendance_correct_request->approved_at = now();
+        $attendance_correct_request->approved_by = Auth::id();
+        $attendance_correct_request->save();
 
         return redirect()->route('admin.approve', ['attendance_correct_request' => $attendance_correct_request->id])
             ->with('success', '勤怠修正申請を承認しました。');
     }
-    
+
     public function adminStaffList()
     {
         $staffs = User::where('role', 'user')->get();
@@ -235,7 +216,6 @@ class AdminController extends Controller
 
     public function adminStaffAttendanceList(Request $request, int $id)
     {
-
         Carbon::setLocale('ja');
 
         $staff = User::findOrFail($id);
@@ -243,12 +223,9 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $month = $request->input('month'); // "2025-10" など
-        if (!$month) {
-            $month = now()->format('Y-m');
-        }
+        $month = $request->input('month') ?: now()->format('Y-m');
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-        $endDate   = $startDate->copy()->endOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
 
         $attendances = Attendance::with('breaks')
             ->where('user_id', $staff->id)
@@ -256,7 +233,7 @@ class AdminController extends Controller
             ->orderBy('work_date')
             ->get();
 
-        $attendanceRecords = $attendances->keyBy(function($a) {
+        $attendanceRecords = $attendances->keyBy(function ($a) {
             return Carbon::parse($a->work_date)->toDateString();
         });
 
@@ -266,7 +243,7 @@ class AdminController extends Controller
             $attendance = $attendanceRecords->get($dateKey);
 
             if ($attendance) {
-                $clockIn  = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
+                $clockIn = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
                 $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
                 $breakMinutes = 0;
                 foreach ($attendance->breaks as $break) {
@@ -274,30 +251,33 @@ class AdminController extends Controller
                         $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
                     }
                 }
-                $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
-                if ($workMinutes < 0) $workMinutes = 0;
+                $workMinutes = ($clockIn && $clockOut)
+                    ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes
+                    : null;
+                if ($workMinutes < 0) {
+                    $workMinutes = 0;
+                }
                 $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
                 $dailyAttendanceList[] = [
-                    'date'       => $date->copy(),
-                    'clock_in'   => $clockIn,
-                    'clock_out'  => $clockOut,
-                    'break_hm'   => $breakMinutes ? $toHm($breakMinutes) : '',
-                    'total_hm'   => !is_null($workMinutes) ? $toHm($workMinutes) : '',
+                    'date' => $date->copy(),
+                    'clock_in' => $clockIn,
+                    'clock_out' => $clockOut,
+                    'break_hm' => $breakMinutes ? $toHm($breakMinutes) : '',
+                    'total_hm' => !is_null($workMinutes) ? $toHm($workMinutes) : '',
                     'detail_url' => route('admin.detail', ['id' => $attendance->id]),
                 ];
             } else {
-                // 勤怠データがない日
                 $dailyAttendanceList[] = [
-                    'date'       => $date->copy(),
-                    'clock_in'   => '',
-                    'clock_out'  => '',
-                    'break_hm'   => '',
-                    'total_hm'   => '',
+                    'date' => $date->copy(),
+                    'clock_in' => '',
+                    'clock_out' => '',
+                    'break_hm' => '',
+                    'total_hm' => '',
                     'detail_url' => null,
                 ];
             }
         }
-            
+
         return view('admin.staff_attendance_list', [
             'staff' => $staff,
             'attendances' => $attendances,
@@ -306,14 +286,13 @@ class AdminController extends Controller
             'endDate' => $endDate,
             'dailyAttendanceList' => $dailyAttendanceList,
         ]);
-
     }
 
     public function exportStaffAttendanceCsv(Request $request, $id)
     {
         $month = $request->input('month') ?? now()->format('Y-m');
-        $startDate = \Carbon\Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-        $endDate   = $startDate->copy()->endOfMonth();
+        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
 
         $staff = User::findOrFail($id);
         $attendances = Attendance::with('breaks')
@@ -322,7 +301,6 @@ class AdminController extends Controller
             ->orderBy('work_date')
             ->get();
 
-        // ヘッダー
         $csv = "日付,出勤,退勤,休憩,合計,備考\n";
 
         foreach ($attendances as $attendance) {
@@ -336,16 +314,21 @@ class AdminController extends Controller
                 }
             }
             $toHm = fn($min) => $min ? sprintf('%d:%02d', intdiv($min, 60), $min % 60) : '';
-            $workMinutes = ($clockIn && $clockOut) ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes : null;
-            if ($workMinutes < 0) $workMinutes = 0;
+            $workMinutes = ($clockIn && $clockOut)
+                ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes
+                : null;
+            if ($workMinutes < 0) {
+                $workMinutes = 0;
+            }
             $totalHm = !is_null($workMinutes) ? $toHm($workMinutes) : '';
             $breakHm = $toHm($breakMinutes);
 
-            $csv .= "{$date},{$clockIn},{$clockOut},{$breakHm},{$totalHm},\"{$attendance->notes}\"\n";
+            $notesEscaped = str_replace('"', '""', $attendance->notes);
+            $csv .= "{$date},{$clockIn},{$clockOut},{$breakHm},{$totalHm},\"{$notesEscaped}\"\n";
         }
 
         $filename = "{$staff->name}_{$month}_attendance.csv";
-        $csv = "\xEF\xBB\xBF" . $csv; // 先頭にBOMを追加
+        $csv = "\xEF\xBB\xBF" . $csv;
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename={$filename}");

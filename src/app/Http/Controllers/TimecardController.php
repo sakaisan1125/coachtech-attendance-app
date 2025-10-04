@@ -74,9 +74,6 @@ class TimecardController extends Controller
         return redirect()->route('attendance')->with('success', 'お疲れ様でした。');
     }
 
-    /**
-     * 今日の勤怠を取得 or 作成
-     */
     private function todayAttendance(Request $request): Attendance
     {
         if (!$request->user()) {
@@ -94,7 +91,7 @@ class TimecardController extends Controller
         try {
             return Attendance::create([
                 'user_id'   => $request->user()->id,
-                'work_date' => now(),       // モデルで Y-m-d に正規化される
+                'work_date' => now(),
                 'status'    => 'off_duty',
             ]);
         } catch (QueryException $e) {

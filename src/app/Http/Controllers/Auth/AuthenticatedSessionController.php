@@ -10,7 +10,6 @@ class AuthenticatedSessionController extends FortifyAuthenticatedSessionControll
 {
     public function store(\Laravel\Fortify\Http\Requests\LoginRequest $request)
     {
-        // 一般ユーザー認証
         if (!auth()->attempt($request->only('email', 'password'))) {
             return back()->withErrors(['auth' => 'ログイン情報が登録されていません'])->withInput();
         }
@@ -19,7 +18,6 @@ class AuthenticatedSessionController extends FortifyAuthenticatedSessionControll
 
     public function adminLogin(AdminLoginRequest $request)
     {
-        // 管理者認証
         if (!auth()->attempt([
             'email' => $request->email,
             'password' => $request->password,
