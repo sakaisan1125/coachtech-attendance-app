@@ -3,7 +3,7 @@
 @section('title', '勤怠一覧（管理者）')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/admin_list.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin-list.css') }}">
 @endsection
 
 @section('content')
@@ -73,10 +73,10 @@
                     @continue(($row->user->role ?? null) === 'admin')
                     <tr>
                         <td>{{ $row->user->name }}</td>
-                        <td>{{ $row->clock_in_at ? \Carbon\Carbon::parse($row->clock_in_at)->format('H:i') : '-' }}</td>
-                        <td>{{ $row->clock_out_at ? \Carbon\Carbon::parse($row->clock_out_at)->format('H:i') : '-' }}</td>
-                        <td>{{ $row->breaks_sum ?? '-' }}</td>
-                        <td>{{ $row->work_sum ?? '-' }}</td>
+                        <td>{{ $row->display_in }}</td>
+                        <td>{{ $row->display_out }}</td>
+                        <td>{{ $row->breaks_sum ?: '-' }}</td>
+                        <td>{{ $row->work_sum ?: '-' }}</td>
                         <td>
                             <a href="{{ route('admin.detail', ['id' => $row->id]) }}" class="attendance-list__detail-link">詳細</a>
                         </td>

@@ -80,9 +80,9 @@ class AttendanceListController extends Controller
 
             $totalWorkMinutes = null;
             if ($clockInTime && $clockOutTime) {
-                $in = Carbon::createFromFormat('H:i', $clockInTime);
+                $in  = Carbon::createFromFormat('H:i', $clockInTime);
                 $out = Carbon::createFromFormat('H:i', $clockOutTime);
-                $totalWorkMinutes = max(0, $out->diffInMinutes($in) * -1 - $totalBreakMinutes);
+                $totalWorkMinutes = max(0, $in->diffInMinutes($out) - $totalBreakMinutes);
             }
 
             $detailUrl = $attendance

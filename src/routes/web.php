@@ -82,5 +82,5 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/login', fn () => view('auth.login'))->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::get('/admin/login', fn () => view('auth.admin_login'))->name('admin.login');
+Route::get('/admin/login', fn () => view('auth.admin-login'))->name('admin.login');
 Route::post('/admin/login', [AuthenticatedSessionController::class, 'adminLogin']);

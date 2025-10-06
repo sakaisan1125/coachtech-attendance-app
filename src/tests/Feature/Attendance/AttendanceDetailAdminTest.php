@@ -172,6 +172,6 @@ class AttendanceDetailAdminTest extends TestCase
 
         $response->assertSessionHasErrors(['notes']);
         $detailResponse = $this->get('/admin/attendance/' . $attendance->id);
-        $detailResponse->assertSee('備考を入力してください');
+        $detailResponse->assertSee('備考を記入してください');
     }
 }

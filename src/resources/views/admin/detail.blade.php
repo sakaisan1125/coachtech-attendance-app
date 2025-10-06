@@ -3,7 +3,7 @@
 @section('title', '勤怠詳細（管理者）')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
+<link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
 @endsection
 
 @section('content')
@@ -59,16 +59,14 @@
                                         type="text"
                                         name="clock_in"
                                         class="attendance-detail__input-time"
-                                        value="{{ old('clock_in', $attendance->clock_in_at?->format('H:i')) }}"
-                                        placeholder="09:00"
+                                        value="{{ old('clock_in', ($attendance->clock_in_at?->format('H:i')) ?? ($clockIn ?? '')) }}"
                                     >
                                     <span class="attendance-detail__separator">〜</span>
                                     <input
                                         type="text"
                                         name="clock_out"
                                         class="attendance-detail__input-time"
-                                        value="{{ old('clock_out', $attendance->clock_out_at?->format('H:i')) }}"
-                                        placeholder="18:00"
+                                        value="{{ old('clock_out', ($attendance->clock_out_at?->format('H:i')) ?? ($clockOut ?? '')) }}"
                                     >
                                 </div>
                                 @error('clock_out')

@@ -7,17 +7,11 @@
             @if(Auth::user()->hasVerifiedEmail())
                 <p style="font-size: 20px; color: #28a745; font-weight: bold;">メール認証は完了しています！</p>
                 <p style="font-size: 16px; color: #000;">サービスをご利用いただけます。</p>
-                <a href="{{ route('attendance') }}" style="
-                    display: inline-block;
-                    background-color: #000;
-                    color: #fff;
-                    padding: 20px 36px;
-                    border-radius: 6px;
-                    text-decoration: none;
-                    font-size: 18px;
-                    font-weight: 500;
-                    border: none;
-                ">勤怠登録画面へ</a>
+                @if (Auth::user()->role === 'admin')
+                    <a href="{{ route('admin.attendance.list') }}" style="display:inline-block;background-color:#000;color:#fff;padding:20px 36px;border-radius:6px;text-decoration:none;font-size:18px;font-weight:500;border:none;">管理画面（勤怠一覧）へ</a>
+                @else
+                    <a href="{{ route('attendance') }}" style="display:inline-block;background-color:#000;color:#fff;padding:20px 36px;border-radius:6px;text-decoration:none;font-size:18px;font-weight:500;border:none;">勤怠登録画面へ</a>
+                @endif
             @else
                 <p style="font-size: 18px; margin-bottom: 5px; color: #000; font-weight: 500;">
                     認証メール内のリンクをクリックすると認証が完了します。<br>

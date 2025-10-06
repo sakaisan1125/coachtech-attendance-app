@@ -11,6 +11,9 @@ class TimecardController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->user()->role !== 'user') {
+            abort(403);
+        }
         $attendance = $this->todayAttendance($request);
         $breaks = $attendance->breaks()->orderBy('id')->get();
 
@@ -19,6 +22,9 @@ class TimecardController extends Controller
 
     public function clockIn(Request $request)
     {
+        if ($request->user()->role !== 'user') {
+            abort(403);
+        }
         $attendance = $this->todayAttendance($request);
 
         if ($attendance->clock_in_at) {
@@ -35,6 +41,9 @@ class TimecardController extends Controller
 
     public function breakStart(Request $request)
     {
+        if ($request->user()->role !== 'user') {
+            abort(403);
+        }
         $attendance = $this->todayAttendance($request);
 
         $attendance->breaks()->create(['break_start_at' => now()]);
@@ -45,6 +54,9 @@ class TimecardController extends Controller
 
     public function breakEnd(Request $request)
     {
+        if ($request->user()->role !== 'user') {
+            abort(403);
+        }
         $attendance = $this->todayAttendance($request);
 
         $openBreak = $attendance->breaks()->whereNull('break_end_at')->latest('id')->first();
@@ -60,6 +72,9 @@ class TimecardController extends Controller
 
     public function clockOut(Request $request)
     {
+        if ($request->user()->role !== 'user') {
+            abort(403);
+        }
         $attendance = $this->todayAttendance($request);
 
         DB::transaction(function () use ($attendance) {

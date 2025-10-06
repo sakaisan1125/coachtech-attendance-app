@@ -23,6 +23,7 @@ class LoginRequest extends FortifyLoginRequest
     {
         return [
             'email.required' => 'メールアドレスを入力してください',
+            'email.email' => '有効なメールアドレスを入力してください',
             'password.required' => 'パスワードを入力してください',
         ];
     }

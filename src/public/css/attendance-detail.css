@@ -79,7 +79,7 @@ body {
 .attendance-detail__table td {
     background: var(--detail-card);
     text-align: center;
-    color: #222;
+    color: #000000;
 }
 
 .attendance-detail__table tr:last-child th,
@@ -96,7 +96,7 @@ body {
 .attendance-detail__label {
     width: 120px;
     color: var(--detail-muted);
-    font-size: 19px;
+    font-size: 16px;
     font-weight: bold;
     letter-spacing: .02em;
     text-align: left;
@@ -105,6 +105,12 @@ body {
 
 .attendance-detail__value--date {
     padding: 0;
+}
+
+.attendance-detail__row--name .attendance-detail__value {
+    color: #000000;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .attendance-detail__date-flex {
@@ -268,7 +274,7 @@ body {
     .attendance-detail__label {
         width: 120px;
         color: var(--detail-muted);
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
         letter-spacing: .02em;
         text-align: left;

@@ -13,6 +13,42 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
+    private function effectiveBreakSegments(Attendance $attendance): array
+    {
+        if ($attendance->breaks->count()) {
+            return $attendance->breaks
+                ->filter(fn($b) => $b->break_start_at && $b->break_end_at && $b->break_end_at > $b->break_start_at)
+                ->sortBy('break_start_at')
+                ->map(fn($b) => [
+                    'start'   => $b->break_start_at->format('H:i'),
+                    'end'     => $b->break_end_at->format('H:i'),
+                    'minutes' => $b->break_start_at->diffInMinutes($b->break_end_at),
+                    'pending' => false,
+                ])->values()->all();
+        }
+
+        $cr = $attendance->correctionRequests
+            ->whereIn('status', ['pending', 'approved'])
+            ->sortByDesc('id')
+            ->first();
+
+        if ($cr && $cr->breaks->count()) {
+            $seg = $cr->breaks
+                ->filter(fn($b) => $b->requested_break_start_at && $b->requested_break_end_at && $b->requested_break_end_at > $b->requested_break_start_at)
+                ->sortBy('requested_break_start_at')
+                ->map(fn($b) => [
+                    'start'   => $b->requested_break_start_at->format('H:i'),
+                    'end'     => $b->requested_break_end_at->format('H:i'),
+                    'minutes' => $b->requested_break_start_at->diffInMinutes($b->requested_break_end_at),
+                    'pending' => $cr->status === 'pending',
+                ])->values()->all();
+            if ($seg) {
+                return $seg;
+            }
+        }
+        return [];
+    }
+
     public function adminAttendanceList(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
@@ -21,35 +57,46 @@ class AdminController extends Controller
 
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        $attendanceData = Attendance::with(['user', 'breaks'])
+        $attendanceData = Attendance::with([
+                'user',
+                'breaks',
+                'correctionRequests.breaks',
+            ])
             ->whereDate('work_date', $date->toDateString())
-            ->whereHas('user', function ($q) {
-                $q->where('role', 'user');
-            })
+            ->whereHas('user', fn($q) => $q->where('role', 'user'))
+            ->orderBy('user_id')
             ->get()
             ->map(function ($row) {
-                $clockIn = $row->clock_in_at;
-                $clockOut = $row->clock_out_at;
+                $segments = $this->effectiveBreakSegments($row);
+                $breakMinutes = array_sum(array_column($segments, 'minutes'));
 
-                $breakMinutes = 0;
-                foreach ($row->breaks as $break) {
-                    if ($break->break_start_at && $break->break_end_at && $break->break_end_at > $break->break_start_at) {
-                        $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
-                    }
-                }
+                $pendingCr = $row->correctionRequests
+                    ->where('status', 'pending')
+                    ->sortByDesc('id')
+                    ->first();
+
+                $clockIn  = $row->clock_in_at ?? ($pendingCr?->requested_clock_in_at);
+                $clockOut = $row->clock_out_at ?? ($pendingCr?->requested_clock_out_at);
 
                 $workMinutes = null;
-                if ($clockIn && $clockOut && $clockOut > $clockIn) {
-                    $workMinutes = $clockIn->diffInMinutes($clockOut) - $breakMinutes;
-                    if ($workMinutes < 0) {
-                        $workMinutes = 0;
+                if ($clockIn && $clockOut) {
+                    $in  = Carbon::parse($clockIn);
+                    $out = Carbon::parse($clockOut);
+                    if ($out->gt($in)) {
+                        $workMinutes = $in->diffInMinutes($out) - $breakMinutes;
+                        if ($workMinutes < 0) {
+                            $workMinutes = 0;
+                        }
                     }
                 }
 
-                $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
+                $fmt = fn($m) => $m ? sprintf('%d:%02d', intdiv($m, 60), $m % 60) : '';
 
-                $row->breaks_sum = $breakMinutes ? $toHm($breakMinutes) : '';
-                $row->work_sum = !is_null($workMinutes) ? $toHm($workMinutes) : '';
+                $row->display_in  = $clockIn  ? Carbon::parse($clockIn)->format('H:i') : '-';
+                $row->display_out = $clockOut ? Carbon::parse($clockOut)->format('H:i') : '-';
+                $row->breaks_sum  = $breakMinutes ? $fmt($breakMinutes) : '';
+                $row->work_sum    = $workMinutes !== null ? $fmt($workMinutes) : '';
+
                 return $row;
             });
 
@@ -58,38 +105,80 @@ class AdminController extends Controller
 
     public function adminRequestPending(Request $request)
     {
-        $rows = CorrectionRequest::with(['attendance.user'])->where('status', 'pending')->latest('id')->get();
+        $rows = CorrectionRequest::with(['attendance.user'])
+            ->where('status', 'pending')
+            ->latest('id')
+            ->get();
         return view('admin.request', ['activeTab' => 'pending', 'rows' => $rows]);
     }
 
     public function adminRequestApproved(Request $request)
     {
-        $rows = CorrectionRequest::with(['attendance.user'])->where('status', 'approved')->latest('approved_at')->get();
+        $rows = CorrectionRequest::with(['attendance.user'])
+            ->where('status', 'approved')
+            ->latest('approved_at')
+            ->get();
         return view('admin.request', ['activeTab' => 'approved', 'rows' => $rows]);
     }
 
     public function adminAttendanceShow(Request $request, int $id)
     {
-        $attendance = Attendance::with(['user', 'breaks'])->findOrFail($id);
+        $attendance = Attendance::with(['user', 'breaks', 'correctionRequests.breaks'])->findOrFail($id);
 
-        $correctionRequest = CorrectionRequest::with('breaks')
-            ->where('attendance_id', $attendance->id)
-            ->whereIn('status', ['pending', 'approved', 'rejected'])
-            ->latest()
+        $pendingCr = $attendance->correctionRequests
+            ->where('status', 'pending')
+            ->sortByDesc('id')
             ->first();
+
+        $workDate = Carbon::parse($attendance->work_date)->format('Y-m-d');
+
+        $normalize = function ($val) use ($workDate) {
+            if (!$val) {
+                return null;
+            }
+            if (is_string($val) && preg_match('/^\d{2}:\d{2}$/', $val)) {
+                return Carbon::createFromFormat('Y-m-d H:i', "$workDate $val");
+            }
+            return Carbon::parse($val);
+        };
+
+        $clockInDt  = $normalize($attendance->clock_in_at ?? ($pendingCr?->requested_clock_in_at));
+        $clockOutDt = $normalize($attendance->clock_out_at ?? ($pendingCr?->requested_clock_out_at));
+
+        if ($clockInDt && $clockOutDt && $clockOutDt->lte($clockInDt)) {
+            $clockOutDt = $clockOutDt->copy()->addDay();
+        }
+
+        $breaksArray = $attendance->breaks
+            ->map(fn($b) => [
+                'start' => $b->break_start_at?->format('H:i'),
+                'end'   => $b->break_end_at?->format('H:i'),
+            ])->values()->all();
+
+        if (empty($breaksArray) && $pendingCr) {
+            $breaksArray = $pendingCr->breaks
+                ->filter(fn($b) => $b->requested_break_start_at && $b->requested_break_end_at)
+                ->sortBy('requested_break_start_at')
+                ->map(fn($b) => [
+                    'start' => $b->requested_break_start_at->format('H:i'),
+                    'end'   => $b->requested_break_end_at->format('H:i'),
+                ])->values()->all();
+        }
+
+        $correctionRequest = $pendingCr
+            ?: $attendance->correctionRequests->sortByDesc('id')->first();
+
         $hasPending = $correctionRequest && $correctionRequest->status === 'pending';
 
         return view('admin.detail', [
-            'attendance' => $attendance,
-            'user' => $attendance->user,
-            'workDate' => Carbon::parse($attendance->work_date)->format('Y年n月j日'),
-            'clockIn' => $attendance->clock_in_at?->format('H:i'),
-            'clockOut' => $attendance->clock_out_at?->format('H:i'),
-            'breaks' => $attendance->breaks->map(fn($b) => [
-                'start' => $b->break_start_at?->format('H:i'),
-                'end' => $b->break_end_at?->format('H:i'),
-            ])->values()->all(),
-            'hasPending' => $hasPending,
+            'attendance'        => $attendance,
+            'user'              => $attendance->user,
+            'workDate'          => Carbon::parse($attendance->work_date)->format('Y年n月j日'),
+            'clockIn'           => $clockInDt?->format('H:i'),
+            'clockOut'          => $clockOutDt?->format('H:i'),
+            'breaks'            => $breaksArray,
+            'hasPending'        => $hasPending,
+            'correctionRequest' => $correctionRequest,
         ]);
     }
 
@@ -97,80 +186,96 @@ class AdminController extends Controller
     {
         $attendance = Attendance::with('breaks')->findOrFail($id);
 
-        $data = $request->validate([
-            'clock_in' => ['nullable', 'date_format:H:i'],
-            'clock_out' => ['nullable', 'date_format:H:i'],
-            'notes' => ['required', 'string', 'max:1000'],
-            'breaks' => ['array'],
+        $rules = [
+            'clock_in'       => ['nullable', 'date_format:H:i'],
+            'clock_out'      => ['nullable', 'date_format:H:i'],
+            'notes'          => ['required', 'string', 'max:1000'],
+            'breaks'         => ['array'],
             'breaks.*.start' => ['nullable', 'date_format:H:i'],
-            'breaks.*.end' => ['nullable', 'date_format:H:i'],
-        ], [
-            'notes.required' => '備考を入力してください',
-        ]);
+            'breaks.*.end'   => ['nullable', 'date_format:H:i'],
+        ];
 
-        $workDate = Carbon::parse($attendance->work_date)->toDateString();
+        $messages = [
+            'notes.required'            => '備考を記入してください',
+            'clock_in.date_format'      => '出勤時間もしくは退勤時間が不適切な値です',
+            'clock_out.date_format'     => '出勤時間もしくは退勤時間が不適切な値です',
+            'breaks.*.start.date_format'=> '休憩時間が不適切な値です',
+            'breaks.*.end.date_format'  => '休憩時間が不適切な値です',
+        ];
 
-        $toDateTime = function (?string $hm) use ($workDate) {
-            if (!$hm) {
-                return null;
+        $validator = \Validator::make($request->all(), $rules, $messages);
+
+        $validator->after(function ($v) use ($request, $attendance) {
+            $workDate = Carbon::parse($attendance->work_date)->toDateString();
+            $toDt = fn($hm) => $hm ? Carbon::createFromFormat('Y-m-d H:i', "$workDate $hm") : null;
+
+            $clockIn  = $toDt($request->input('clock_in'));
+            $clockOut = $toDt($request->input('clock_out'));
+
+            if ($clockIn && $clockOut && $clockIn->gte($clockOut)) {
+                $v->errors()->add('clock_out', '出勤時間もしくは退勤時間が不適切な値です');
             }
-            return Carbon::createFromFormat('Y-m-d H:i', "$workDate $hm");
-        };
 
-        $clockIn = $toDateTime($data['clock_in'] ?? null);
-        $clockOut = $toDateTime($data['clock_out'] ?? null);
+            $breaks = $request->input('breaks', []);
+            foreach ($breaks as $i => $br) {
+                $start = $toDt($br['start'] ?? null);
+                $end   = $toDt($br['end'] ?? null);
+                if (!$start && !$end) {
+                    continue;
+                }
+                if (!$start || !$end || $start->gte($end)) {
+                    $v->errors()->add("breaks.$i.start", '休憩時間が不適切な値です');
+                    continue;
+                }
+                if ($clockIn && $start->lt($clockIn)) {
+                    $v->errors()->add("breaks.$i.start", '休憩時間が不適切な値です');
+                }
+                if ($clockOut && $end->gt($clockOut)) {
+                    $v->errors()->add("breaks.$i.end", '休憩時間もしくは退勤時間が不適切な値です');
+                }
+            }
+        });
 
-        if ($clockIn && $clockOut && $clockIn->gte($clockOut)) {
-            return back()->withInput()->withErrors([
-                'clock_out' => '出勤時間もしくは退勤時間が不適切な値です',
-            ]);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
+
+        $data = $validator->validated();
+        $workDate = Carbon::parse($attendance->work_date)->toDateString();
+        $toDt = fn($hm) => $hm ? Carbon::createFromFormat('Y-m-d H:i', "$workDate $hm") : null;
+        $clockIn  = $toDt($data['clock_in'] ?? null);
+        $clockOut = $toDt($data['clock_out'] ?? null);
 
         $breakPayloads = [];
-        foreach ($data['breaks'] ?? [] as $i => $br) {
-            $start = $toDateTime($br['start'] ?? null);
-            $end = $toDateTime($br['end'] ?? null);
-
-            if (!$start && !$end) {
-                continue;
+        foreach ($request->input('breaks', []) as $br) {
+            $start = $toDt($br['start'] ?? null);
+            $end   = $toDt($br['end'] ?? null);
+            if ($start && $end && $start->lt($end)) {
+                $breakPayloads[] = [
+                    'break_start_at' => $start,
+                    'break_end_at'   => $end,
+                ];
             }
-
-            if (!$start || !$end || ($start && $end && $start->gte($end))) {
-                return back()->withInput()->withErrors([
-                    "breaks.$i.start" => '休憩時間が不適切な値です',
-                ]);
-            }
-            if ($clockIn && $start->lt($clockIn)) {
-                return back()->withInput()->withErrors([
-                    "breaks.$i.start" => '休憩時間が不適切な値です',
-                ]);
-            }
-            if ($clockOut && $end->gt($clockOut)) {
-                return back()->withInput()->withErrors([
-                    "breaks.$i.end" => '休憩時間もしくは退勤時間が不適切な値です',
-                ]);
-            }
-
-            $breakPayloads[] = ['break_start_at' => $start, 'break_end_at' => $end];
         }
 
-        DB::transaction(function () use ($attendance, $clockIn, $clockOut, $data, $breakPayloads) {
-            $attendance->clock_in_at = $clockIn;
+        \DB::transaction(function () use ($attendance, $clockIn, $clockOut, $data, $breakPayloads) {
+            $attendance->clock_in_at  = $clockIn;
             $attendance->clock_out_at = $clockOut;
-            $attendance->notes = $data['notes'] ?? null;
+            $attendance->notes        = $data['notes'] ?? null;
             $attendance->save();
 
             BreakModel::where('attendance_id', $attendance->id)->delete();
             foreach ($breakPayloads as $bp) {
                 BreakModel::create([
-                    'attendance_id' => $attendance->id,
+                    'attendance_id'  => $attendance->id,
                     'break_start_at' => $bp['break_start_at'],
-                    'break_end_at' => $bp['break_end_at'],
+                    'break_end_at'   => $bp['break_end_at'],
                 ]);
             }
         });
 
-        return redirect()->route('admin.attendance.list', ['id' => $attendance->id])
+        return redirect()
+            ->route('admin.attendance.list', ['date' => $attendance->work_date->toDateString()])
             ->with('success', '修正しました。');
     }
 
@@ -184,27 +289,43 @@ class AdminController extends Controller
 
         return view('admin.approve', [
             'correctionRequest' => $correctionRequest,
-            'attendance' => $attendance,
-            'user' => $user,
-            'hasPending' => $hasPending,
-            'isApproved' => $isApproved,
+            'attendance'        => $attendance,
+            'user'              => $user,
+            'hasPending'        => $hasPending,
+            'isApproved'        => $isApproved,
         ]);
     }
 
     public function approveCorrectionRequest(Request $request, CorrectionRequest $attendance_correct_request)
     {
+        $attendance_correct_request->load(['breaks', 'attendance.breaks']);
         $attendance = $attendance_correct_request->attendance;
-        $attendance->clock_in_at = $attendance_correct_request->requested_clock_in_at;
-        $attendance->clock_out_at = $attendance_correct_request->requested_clock_out_at;
-        $attendance->notes = $attendance_correct_request->requested_notes;
-        $attendance->save();
 
-        $attendance_correct_request->status = 'approved';
-        $attendance_correct_request->approved_at = now();
-        $attendance_correct_request->approved_by = Auth::id();
-        $attendance_correct_request->save();
+        DB::transaction(function () use ($attendance, $attendance_correct_request) {
+            $attendance->clock_in_at  = $attendance_correct_request->requested_clock_in_at;
+            $attendance->clock_out_at = $attendance_correct_request->requested_clock_out_at;
+            $attendance->notes        = $attendance_correct_request->requested_notes;
+            $attendance->save();
 
-        return redirect()->route('admin.approve', ['attendance_correct_request' => $attendance_correct_request->id])
+            BreakModel::where('attendance_id', $attendance->id)->delete();
+            foreach ($attendance_correct_request->breaks as $br) {
+                if ($br->requested_break_start_at && $br->requested_break_end_at) {
+                    BreakModel::create([
+                        'attendance_id'  => $attendance->id,
+                        'break_start_at' => $br->requested_break_start_at,
+                        'break_end_at'   => $br->requested_break_end_at,
+                    ]);
+                }
+            }
+
+            $attendance_correct_request->status      = 'approved';
+            $attendance_correct_request->approved_at = now();
+            $attendance_correct_request->approved_by = Auth::id();
+            $attendance_correct_request->save();
+        });
+
+        return redirect()
+            ->route('admin.approve', ['attendance_correct_request' => $attendance_correct_request->id])
             ->with('success', '勤怠修正申請を承認しました。');
     }
 
@@ -225,65 +346,73 @@ class AdminController extends Controller
 
         $month = $request->input('month') ?: now()->format('Y-m');
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
+        $endDate   = $startDate->copy()->endOfMonth();
 
-        $attendances = Attendance::with('breaks')
+        $attendances = Attendance::with(['breaks', 'correctionRequests.breaks'])
             ->where('user_id', $staff->id)
             ->whereBetween('work_date', [$startDate, $endDate])
             ->orderBy('work_date')
             ->get();
 
-        $attendanceRecords = $attendances->keyBy(function ($a) {
-            return Carbon::parse($a->work_date)->toDateString();
-        });
+        $attendanceRecords = $attendances->keyBy(fn($a) => Carbon::parse($a->work_date)->toDateString());
 
         $dailyAttendanceList = [];
+        $fmt = fn($m) => $m ? sprintf('%d:%02d', intdiv($m, 60), $m % 60) : '';
+
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             $dateKey = $date->toDateString();
             $attendance = $attendanceRecords->get($dateKey);
 
             if ($attendance) {
-                $clockIn = $attendance->clock_in_at ? $attendance->clock_in_at->format('H:i') : '';
-                $clockOut = $attendance->clock_out_at ? $attendance->clock_out_at->format('H:i') : '';
-                $breakMinutes = 0;
-                foreach ($attendance->breaks as $break) {
-                    if ($break->break_start_at && $break->break_end_at) {
-                        $breakMinutes += $break->break_start_at->diffInMinutes($break->break_end_at);
+                $segments = $this->effectiveBreakSegments($attendance);
+                $breakMinutes = array_sum(array_column($segments, 'minutes'));
+
+                $pendingCr = $attendance->correctionRequests
+                    ->where('status', 'pending')
+                    ->sortByDesc('id')
+                    ->first();
+
+                $clockIn  = $attendance->clock_in_at ?? ($pendingCr?->requested_clock_in_at);
+                $clockOut = $attendance->clock_out_at ?? ($pendingCr?->requested_clock_out_at);
+
+                $workMinutes = null;
+                if ($clockIn && $clockOut) {
+                    $in  = Carbon::parse($clockIn);
+                    $out = Carbon::parse($clockOut);
+                    if ($out->gt($in)) {
+                        $workMinutes = $in->diffInMinutes($out) - $breakMinutes;
+                        if ($workMinutes < 0) {
+                            $workMinutes = 0;
+                        }
                     }
                 }
-                $workMinutes = ($clockIn && $clockOut)
-                    ? Carbon::createFromFormat('H:i', $clockIn)->diffInMinutes(Carbon::createFromFormat('H:i', $clockOut)) - $breakMinutes
-                    : null;
-                if ($workMinutes < 0) {
-                    $workMinutes = 0;
-                }
-                $toHm = fn($min) => sprintf('%d:%02d', intdiv($min, 60), $min % 60);
+
                 $dailyAttendanceList[] = [
-                    'date' => $date->copy(),
-                    'clock_in' => $clockIn,
-                    'clock_out' => $clockOut,
-                    'break_hm' => $breakMinutes ? $toHm($breakMinutes) : '',
-                    'total_hm' => !is_null($workMinutes) ? $toHm($workMinutes) : '',
+                    'date'       => $date->copy(),
+                    'clock_in'   => $clockIn  ? Carbon::parse($clockIn)->format('H:i') : '',
+                    'clock_out'  => $clockOut ? Carbon::parse($clockOut)->format('H:i') : '',
+                    'break_hm'   => $breakMinutes ? $fmt($breakMinutes) : '',
+                    'total_hm'   => $workMinutes !== null ? $fmt($workMinutes) : '',
                     'detail_url' => route('admin.detail', ['id' => $attendance->id]),
                 ];
             } else {
                 $dailyAttendanceList[] = [
-                    'date' => $date->copy(),
-                    'clock_in' => '',
-                    'clock_out' => '',
-                    'break_hm' => '',
-                    'total_hm' => '',
+                    'date'       => $date->copy(),
+                    'clock_in'   => '',
+                    'clock_out'  => '',
+                    'break_hm'   => '',
+                    'total_hm'   => '',
                     'detail_url' => null,
                 ];
             }
         }
 
-        return view('admin.staff_attendance_list', [
-            'staff' => $staff,
-            'attendances' => $attendances,
-            'month' => $month,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
+        return view('admin.staff-attendance-list', [
+            'staff'               => $staff,
+            'attendances'         => $attendances,
+            'month'               => $month,
+            'startDate'           => $startDate,
+            'endDate'             => $endDate,
             'dailyAttendanceList' => $dailyAttendanceList,
         ]);
     }
@@ -322,13 +451,13 @@ class AdminController extends Controller
             }
             $totalHm = !is_null($workMinutes) ? $toHm($workMinutes) : '';
             $breakHm = $toHm($breakMinutes);
-
             $notesEscaped = str_replace('"', '""', $attendance->notes);
             $csv .= "{$date},{$clockIn},{$clockOut},{$breakHm},{$totalHm},\"{$notesEscaped}\"\n";
         }
 
         $filename = "{$staff->name}_{$month}_attendance.csv";
         $csv = "\xEF\xBB\xBF" . $csv;
+
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename={$filename}");

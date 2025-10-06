@@ -30,26 +30,43 @@ class AttendanceDetailController extends Controller
 
         if ($hasPending) {
             $display = [
-                'clock_in_at' => $correctionRequest->requested_clock_in_at,
+                'clock_in_at'  => $correctionRequest->requested_clock_in_at,
                 'clock_out_at' => $correctionRequest->requested_clock_out_at,
-                'breaks' => $correctionRequest->breaks,
-                'notes' => $correctionRequest->requested_notes,
+                'notes'        => $correctionRequest->requested_notes,
             ];
+            $displayBreaks = $correctionRequest->breaks
+                ->sortBy(fn($b) => $b->index ?? $b->requested_break_start_at)
+                ->map(fn($b) => [
+                    'start' => $b->requested_break_start_at?->format('H:i'),
+                    'end'   => $b->requested_break_end_at?->format('H:i'),
+                ])
+                ->values()
+                ->all();
         } else {
             $display = [
-                'clock_in_at' => $attendance->clock_in_at,
+                'clock_in_at'  => $attendance->clock_in_at,
                 'clock_out_at' => $attendance->clock_out_at,
-                'breaks' => $attendance->breaks,
-                'notes' => $attendance->notes,
+                'notes'        => $attendance->notes,
             ];
+            $displayBreaks = $attendance->breaks
+                ->sortBy('break_start_at')
+                ->map(fn($b) => [
+                    'start' => $b->break_start_at?->format('H:i'),
+                    'end'   => $b->break_end_at?->format('H:i'),
+                ])
+                ->values()
+                ->all();
         }
 
+        $displayBreaks[] = ['start' => null, 'end' => null];
+
         return view('attendance.detail', [
-            'attendance' => $attendance,
-            'user' => $user,
-            'correctionRequest' => $correctionRequest,
-            'hasPending' => $hasPending,
-            'display' => $display,
+            'attendance'       => $attendance,
+            'user'             => $user,
+            'correctionRequest'=> $correctionRequest,
+            'hasPending'       => $hasPending,
+            'display'          => $display,
+            'displayBreaks'    => $displayBreaks,
         ]);
     }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\AdminLoginRequest;
-use App\Http\Requests\LoginRequest;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController as FortifyAuthenticatedSessionController;
 
 class AuthenticatedSessionController extends FortifyAuthenticatedSessionController
@@ -19,12 +18,17 @@ class AuthenticatedSessionController extends FortifyAuthenticatedSessionControll
     public function adminLogin(AdminLoginRequest $request)
     {
         if (!auth()->attempt([
-            'email' => $request->email,
+            'email'    => $request->email,
             'password' => $request->password,
-            'role' => 'admin'
+            'role'     => 'admin'
         ])) {
             return back()->withErrors(['auth' => 'ログイン情報が登録されていません'])->withInput();
         }
+
+        if (auth()->user()->email_verified_at === null) {
+            auth()->user()->forceFill(['email_verified_at' => now()])->save();
+        }
+
         return redirect()->route('admin.attendance.list');
     }
 }

@@ -3,7 +3,7 @@
 @section('title', '修正申請承認画面（管理者）')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/attendance_detail.css') }}">
+<link rel="stylesheet" href="{{ asset('css/attendance-detail.css') }}">
 @endsection
 
 @section('content')
@@ -29,7 +29,11 @@
         })
         ->toArray();
 
-    $breakRows[] = ['start' => null, 'end' => null];
+    // ここを変更: 最低2行になるまで空行追加（元は1行だけ）
+    while (count($breakRows) < 2) {
+        $breakRows[] = ['start' => null, 'end' => null];
+    }
+
     $dash = '';
 @endphp
 

@@ -7,7 +7,6 @@ use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Attendance;
-use App\Models\BreakModel;
 use Carbon\Carbon;
 
 class AttendanceBreakTest extends TestCase
@@ -100,7 +99,6 @@ class AttendanceBreakTest extends TestCase
 
         $this->post(route('attendance.break_start'));
         $this->post(route('attendance.break_end'));
-
         $this->post(route('attendance.break_start'));
         $this->post(route('attendance.break_end'));
 
@@ -118,7 +116,8 @@ class AttendanceBreakTest extends TestCase
         $attendance = Attendance::with('breaks')->find($attendance->id);
 
         $response = $this->get('/attendance/list');
-        file_put_contents(storage_path('logs/response.html'), $response->getContent());
         $response->assertSee('0:15');
+
+        Carbon::setTestNow(); 
     }
 }
