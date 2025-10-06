@@ -2,12 +2,12 @@ version: "3.9"
 services:
   php:
     build: ./docker/php
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./:/var/www/html
     working_dir: /var/www/html
     depends_on:
       - mysql
-    user: "${UID}:${GID}"
   nginx:
     image: nginx:1.27-alpine
     ports:
