@@ -7,7 +7,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         App\Providers\AppServiceProvider::class,
-        App\Providers\FortifyServiceProvider::class, // ← これを入れる
+        App\Providers\FortifyServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

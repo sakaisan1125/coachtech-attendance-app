@@ -45,15 +45,15 @@ APP_URL=http://localhost
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=laravel
-DB_PASSWORD=secret
+DB_DATABASE=laravel_db
+DB_USERNAME=laravel_user
+DB_PASSWORD=laravel_pass
 
 MAIL_MAILER=smtp
 MAIL_HOST=mailhog
 MAIL_PORT=1025
-MAIL_FROM_ADDRESS=noreply@example.com
-MAIL_FROM_NAME="coachtech-attendance-app"
+MAIL_FROM_ADDRESS=hello@example.com
+MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 ## 主な画面/ルート
